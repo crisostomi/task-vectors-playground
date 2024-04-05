@@ -1,0 +1,48 @@
+# metadata specialised for each experiment
+core:
+  project_name: task-vectors-playground
+  storage_dir: ${oc.env:PROJECT_ROOT}/storage
+  version: 0.0.1
+  tags:
+    - dev
+
+seed_index: 0
+
+dataset:
+  arbitrary_tvs: null
+  multiple_dataset_names: null
+  dataset_name: 'SVHN'
+  data_location: "${oc.env:PROJECT_ROOT}/data"
+  eval_datasets:
+    - ${dataset.dataset_name}
+  train_dataset: "${dataset.dataset_name}Val" # TODO: why val?
+
+model:
+  ft_type: null
+  masked_pct: null
+  model: 'ViT-B-16'
+
+training:
+  dry_run: false
+  manual_seed: null
+  batch_size: 64
+  lr: 0.001
+  wd: 0.1
+  ls: 0.0
+  warmup_length: 500
+  epochs: 10
+
+task_vectors:
+  to_apply:
+    - MNIST
+  scaling_coefficient: null
+
+misc:
+  save_pretrained: false
+  exp_name: null
+  results_db: null
+  load: null
+  ckpt_dir: ${oc.env:PROJECT_ROOT}/checkpoints/${model.model}
+  pretrained_checkpoint: ${misc.save}/zeroshot.pt
+  cache_dir: null
+  openclip_cachedir: "./openclip_cache"

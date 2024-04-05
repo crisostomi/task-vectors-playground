@@ -2,10 +2,11 @@ import os
 
 import open_clip
 import torch
-from src.datasets.registry import get_dataset
-from src.datasets.templates import get_templates
-from src.modeling import ClassificationHead, ImageEncoder
 from tqdm import tqdm
+
+from tvp.data.datasets.registry import get_dataset
+from tvp.data.datasets.templates import get_templates
+from tvp.modules.encoder import ClassificationHead, ImageEncoder
 
 
 def build_classification_head(model, dataset_name, template, data_location, device):
@@ -28,7 +29,6 @@ def build_classification_head(model, dataset_name, template, data_location, devi
 
             if type(embeddings) is tuple:
                 embeddings = embeddings[0]
-                # activationss = embeddings[1]
 
             embeddings /= embeddings.norm(dim=-1, keepdim=True)
 
@@ -50,15 +50,18 @@ def build_classification_head(model, dataset_name, template, data_location, devi
     return classification_head
 
 
-def get_classification_head(args, dataset):
-    filename = os.path.join(args.save, f"head_{dataset}.pt")
+def get_classification_head(model, dataset, data_path, ckpt_path, cache_dir, openclip_cachedir, device="cuda"):
+    filename = os.path.join(ckpt_path, f"head_{dataset}.pt")
+
     if os.path.exists(filename):
-        print(f"Classification head for {args.model} on {dataset} exists at {filename}")
+        print(f"Classification head for {model} on {dataset} exists at {filename}")
         return ClassificationHead.load(filename)
-    print(f"Did not find classification head for {args.model} on {dataset} at {filename}, building one from scratch.")
-    model = ImageEncoder(args, keep_lang=True).model
+
+    print(f"Did not find classification head for {model} on {dataset} at {filename}, building one from scratch.")
+    model = ImageEncoder(model, cache_dir=cache_dir, openclip_cachedir=openclip_cachedir, keep_lang=True).model
     template = get_templates(dataset)
-    classification_head = build_classification_head(model, dataset, template, args.data_location, args.device)
-    os.makedirs(args.save, exist_ok=True)
+    classification_head = build_classification_head(model, dataset, template, data_path, device)
+    os.makedirs(ckpt_path, exist_ok=True)
     classification_head.save(filename)
+
     return classification_head

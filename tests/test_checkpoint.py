@@ -9,7 +9,7 @@ from omegaconf import DictConfig, OmegaConf
 from nn_core.serialization import NNCheckpointIO
 from tests.conftest import load_checkpoint
 
-from tvp.pl_modules.pl_module import MyLightningModule
+from tvp.pl_modules.pl_module import ImageClassifier
 from tvp.run import run
 
 
@@ -49,7 +49,7 @@ def test_cfg_in_checkpoint(run_trainings_not_dry: str, cfg_all_not_dry: DictConf
     _check_run_path_in_checkpoint(checkpoint)
 
 
-class ModuleWithCustomCheckpoint(MyLightningModule):
+class ModuleWithCustomCheckpoint(ImageClassifier):
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         checkpoint["test_key"] = "test_value"
 

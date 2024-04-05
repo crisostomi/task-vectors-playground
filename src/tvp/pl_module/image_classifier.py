@@ -6,6 +6,7 @@ import lightning.pytorch as pl
 import omegaconf
 import torch
 import torch.nn.functional as F
+import torch.nn.utils.prune as prune
 import torchmetrics
 from torch.optim import Optimizer
 
@@ -13,14 +14,15 @@ from nn_core.common import PROJECT_ROOT
 from nn_core.model_logging import NNLogger
 
 from tvp.data.datamodule import MetaData
+from tvp.utils.utils import torch_load, torch_save
 
 pylogger = logging.getLogger(__name__)
 
 
-class MyLightningModule(pl.LightningModule):
+class ImageClassifier(pl.LightningModule):
     logger: NNLogger
 
-    def __init__(self, model, metadata: Optional[MetaData] = None, *args, **kwargs) -> None:
+    def __init__(self, encoder, classifier, metadata: Optional[MetaData] = None, *args, **kwargs) -> None:
         super().__init__()
 
         # Populate self.hparams with args and kwargs automagically!
@@ -29,17 +31,21 @@ class MyLightningModule(pl.LightningModule):
         self.save_hyperparameters(logger=False, ignore=("metadata",))
 
         self.metadata = metadata
+        self.num_classes = classifier.out_features
 
-        # example
-        metric = torchmetrics.Accuracy(
-            task="multiclass",
-            num_classes=len(metadata.class_vocab) if metadata is not None else None,
-        )
+        print(self.num_classes)
+
+        metric = torchmetrics.Accuracy(task="multiclass", num_classes=self.num_classes, top_k=1)
         self.train_acc = metric.clone()
         self.val_acc = metric.clone()
         self.test_acc = metric.clone()
 
-        self.model = hydra.utils.instantiate(model, num_classes=len(metadata.class_vocab))
+        self.encoder = encoder
+        self.classification_head = classifier
+
+        # self.encoder = hydra.utils.instantiate(encoder)
+
+        # self.classification_head = hydra.utils.instantiate(classifier, num_classes=len(metadata.class_vocab))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Method for the forward pass.
@@ -50,14 +56,24 @@ class MyLightningModule(pl.LightningModule):
         Returns:
             output_dict: forward output containing the predictions (output logits ecc...) and the loss if any.
         """
-        # example
-        return self.model(x)
+        # This workaround https://github.com/pytorch/pytorch/issues/69353 is essential to be executed before the forward
+        # in order to prevent PyTorch RuntimeError when pruning and using Attention-based layers
+        for i in range(len(self.module.image_encoder.model.visual.transformer.resblocks)):
+            module = self.module.image_encoder.model.visual.transformer.resblocks[i].attn.out_proj
+            for hook in module._forward_pre_hooks.values():
+                if isinstance(hook, prune.BasePruningMethod):
+                    hook(module, None)
+
+        embeddings = self.encoder(x)
+
+        logits = self.classification_head(embeddings)
+
+        return logits
 
     def _step(self, batch: Dict[str, torch.Tensor], split: str) -> Mapping[str, Any]:
         x = batch[self.hparams.x_key]
         gt_y = batch[self.hparams.y_key]
 
-        # example
         logits = self(x)
         loss = F.cross_entropy(logits, gt_y)
         preds = torch.softmax(logits, dim=-1)
@@ -74,6 +90,10 @@ class MyLightningModule(pl.LightningModule):
         )
 
         return {"logits": logits.detach(), "loss": loss}
+
+    def freeze_head(self):
+        self.classification_head.weight.requires_grad_(False)
+        self.classification_head.bias.requires_grad_(False)
 
     def training_step(self, batch: Any, batch_idx: int) -> Mapping[str, Any]:
         return self._step(batch=batch, split="train")
@@ -107,17 +127,19 @@ class MyLightningModule(pl.LightningModule):
         scheduler = hydra.utils.instantiate(self.hparams.lr_scheduler, optimizer=opt)
         return [opt], [scheduler]
 
+    # def forward(self, inputs):
+    #     features, activation_maps = self.image_encoder(inputs)
+    #     outputs = self.classification_head(features)
+    #     return outputs, activation_maps
 
-@hydra.main(config_path=str(PROJECT_ROOT / "conf"), config_name="default")
-def main(cfg: omegaconf.DictConfig) -> None:
-    """Debug main to quickly develop the Lightning Module.
+    def __call__(self, inputs):
+        return self.forward(inputs)
 
-    Args:
-        cfg: the hydra configuration
-    """
-    m: pl.LightningDataModule = hydra.utils.instantiate(cfg.nn.data, _recursive_=False)
-    _: pl.LightningModule = hydra.utils.instantiate(cfg.nn.module, _recursive_=False, metadata=m.metadata)
+    def save(self, filename):
+        print(f"Saving image classifier to {filename}")
+        torch_save(self, filename)
 
-
-if __name__ == "__main__":
-    main()
+    @classmethod
+    def load(cls, filename):
+        print(f"Loading image classifier from {filename}")
+        return torch_load(filename)

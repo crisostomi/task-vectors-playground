@@ -3,17 +3,17 @@ import os
 
 import torch
 import tqdm
-from src.datasets.common import get_dataloader, maybe_dictionarize
-from src.datasets.registry import get_dataset
-from src.heads import get_classification_head
-from src.modeling import ImageClassifier
 
-from src import utils
+from tvp.data.datasets.common import get_dataloader, maybe_dictionarize
+from tvp.data.datasets.registry import get_dataset
+from tvp.modules.encoder import ImageEncoder
+from tvp.modules.heads import get_classification_head
+from tvp.utils.utils import get_logits
 
 
 def eval_single_dataset(image_encoder, dataset_name, args):
     classification_head = get_classification_head(args, dataset_name)
-    model = ImageClassifier(image_encoder, classification_head)
+    model = ImageEncoder(image_encoder, classification_head)
 
     model.eval()
 
@@ -28,7 +28,7 @@ def eval_single_dataset(image_encoder, dataset_name, args):
             x = data["images"].to(device)
             y = data["labels"].to(device)
 
-            logits, activation_maps = utils.get_logits(x, model)
+            logits, activation_maps = get_logits(x, model)
 
             pred = logits.argmax(dim=1, keepdim=True).to(device)
 
