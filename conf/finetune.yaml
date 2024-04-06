@@ -1,7 +1,7 @@
-# metadata specialised for each experiment
 core:
   project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
+  entity: gladia
   version: 0.0.1
   tags:
     - dev
@@ -13,62 +13,16 @@ defaults:
   - _self_ # as last argument to allow the override of parameters via this main config
 
 seed_index: 0
+reset_pretrained_model: false
 
 conventions:
   x_key: 'x'
   y_key: 'y'
 
-data:
-  arbitrary_tvs: null
-  multiple_dataset_names: null
-  dataset_name: 'SVHN'
-  data_path: "${oc.env:PROJECT_ROOT}/data"
-  eval_datasets:
-    - ${data.dataset_name}
-  train_dataset: "${data.dataset_name}Val" # TODO: why val?
-
-model:
-  model: 'ViT-B-16'
-
-
-training:
-  loss_fn:
-    # _target_: tvp.utils.utils.LabelSmoothing
-    # ls: 0.0
-    _target_: torch.nn.CrossEntropyLoss
-  dry_run: false
-  manual_seed: null
-  ft_type: null
-  masked_pct: null
-  batch_size: 64
-  lr: 1e-5
-  wd: 0.1
-  ls: 0.0
-  warmup_length: 500
-  epochs:
-    Cars: 35
-    DTD: 76
-    EuroSAT: 12
-    GTSRB: 11
-    MNIST: 5
-    RESISC45: 15
-    SUN397: 14
-    SVHN: 4
-    ImageNet: 6
-    STL10: 6
-    CIFAR100: 6
-
-task_vectors:
-  to_apply:
-    - MNIST
-  scaling_coefficient: null
 
 misc:
   save_pretrained: false
-  exp_name: null
-  results_db: null
-  load: null
-  ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${model.model}
-  pretrained_checkpoint: ${misc.save}/zeroshot.pt
+  ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}
+  pretrained_checkpoint: ${misc.ckpt_path}/zeroshot.pt
+  openclip_cachedir: "${oc.env:PROJECT_ROOT}/checkpoints/openclip_cache"
   cache_dir: null
-  openclip_cachedir: "./openclip_cache"

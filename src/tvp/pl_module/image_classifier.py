@@ -2,8 +2,8 @@ import logging
 from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Union
 
 import hydra
-import lightning.pytorch as pl
 import omegaconf
+import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 import torch.nn.utils.prune as prune
@@ -14,6 +14,7 @@ from nn_core.common import PROJECT_ROOT
 from nn_core.model_logging import NNLogger
 
 from tvp.data.datamodule import MetaData
+from tvp.data.datasets.common import maybe_dictionarize
 from tvp.utils.utils import torch_load, torch_save
 
 pylogger = logging.getLogger(__name__)
@@ -33,8 +34,6 @@ class ImageClassifier(pl.LightningModule):
         self.metadata = metadata
         self.num_classes = classifier.out_features
 
-        print(self.num_classes)
-
         metric = torchmetrics.Accuracy(task="multiclass", num_classes=self.num_classes, top_k=1)
         self.train_acc = metric.clone()
         self.val_acc = metric.clone()
@@ -42,10 +41,6 @@ class ImageClassifier(pl.LightningModule):
 
         self.encoder = encoder
         self.classification_head = classifier
-
-        # self.encoder = hydra.utils.instantiate(encoder)
-
-        # self.classification_head = hydra.utils.instantiate(classifier, num_classes=len(metadata.class_vocab))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Method for the forward pass.
@@ -56,14 +51,6 @@ class ImageClassifier(pl.LightningModule):
         Returns:
             output_dict: forward output containing the predictions (output logits ecc...) and the loss if any.
         """
-        # This workaround https://github.com/pytorch/pytorch/issues/69353 is essential to be executed before the forward
-        # in order to prevent PyTorch RuntimeError when pruning and using Attention-based layers
-        for i in range(len(self.module.image_encoder.model.visual.transformer.resblocks)):
-            module = self.module.image_encoder.model.visual.transformer.resblocks[i].attn.out_proj
-            for hook in module._forward_pre_hooks.values():
-                if isinstance(hook, prune.BasePruningMethod):
-                    hook(module, None)
-
         embeddings = self.encoder(x)
 
         logits = self.classification_head(embeddings)
@@ -71,6 +58,8 @@ class ImageClassifier(pl.LightningModule):
         return logits
 
     def _step(self, batch: Dict[str, torch.Tensor], split: str) -> Mapping[str, Any]:
+        batch = maybe_dictionarize(batch, self.hparams.x_key, self.hparams.y_key)
+
         x = batch[self.hparams.x_key]
         gt_y = batch[self.hparams.y_key]
 
@@ -126,11 +115,6 @@ class ImageClassifier(pl.LightningModule):
             return [opt]
         scheduler = hydra.utils.instantiate(self.hparams.lr_scheduler, optimizer=opt)
         return [opt], [scheduler]
-
-    # def forward(self, inputs):
-    #     features, activation_maps = self.image_encoder(inputs)
-    #     outputs = self.classification_head(features)
-    #     return outputs, activation_maps
 
     def __call__(self, inputs):
         return self.forward(inputs)

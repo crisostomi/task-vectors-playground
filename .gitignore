@@ -224,4 +224,6 @@ fabric.properties
 openclip_cache/
 .vscode/
 checkpoints/
-data/
+./data/
+artifacts/
+outputs/

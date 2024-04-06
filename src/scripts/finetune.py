@@ -26,6 +26,7 @@ from tvp.modules.heads import get_classification_head
 from tvp.pl_module.image_classifier import ImageClassifier
 from tvp.utils.args import parse_arguments
 from tvp.utils.eval import evaluate
+from tvp.utils.io_utils import load_model_from_artifact
 from tvp.utils.utils import LabelSmoothing, cosine_lr, print_mask_summary, print_params_summary
 
 
@@ -52,123 +53,97 @@ pylogger = logging.getLogger(__name__)
 
 
 def run(cfg: DictConfig):
-    image_encoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
+    seed_index_everything(cfg)
 
-    classification_head = get_classification_head(
-        cfg.nn.module.model.model_name,
-        cfg.data.train_dataset,
-        cfg.data.data_path,
-        cfg.misc.ckpt_path,
-        cache_dir=cfg.misc.cache_dir,
-        openclip_cachedir=cfg.misc.openclip_cachedir,
-    )
-
-    dataset = get_dataset(
-        cfg.data.train_dataset,
-        preprocess_fn=image_encoder.train_preprocess,
-        location=cfg.data.data_path,
-        batch_size=cfg.training.batch_size,
-    )
-
-    model = ImageClassifier(image_encoder, classification_head)
-
-    model.freeze_head()
-
-    num_batches = len(dataset.train_loader)
-
-    loss = hydra.utils.instantiate(cfg.training.loss_fn)
-
-    # Saving zero-shot model
-    if cfg.misc.save_pretrained:
-        pylogger.info(f"Saving zero-shot model to {cfg.misc.ckpt_path}")
-        os.makedirs(cfg.misc.ckpt_path, exist_ok=True)
-        model_path = os.path.join(
-            cfg.misc.ckpt_path,
-            f"zeroshot_{cfg.training.ft_type}"
-            + ("_pct_" + str(int(cfg.training.masked_pct * 100)) if cfg.training.ft_type == "masked" else "")
-            + ".pt",
-        )
-        model.module.image_encoder.save(model_path)
-
-    params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.AdamW(params, lr=cfg.training.lr, weight_decay=cfg.training.wd)
-
-    num_epochs = cfg.training.epochs[cfg.data.dataset_name]
-    scheduler = cosine_lr(optimizer, cfg.training.lr, cfg.training.warmup_length, num_epochs * num_batches)
-
-    # NOTE: keep this ALWAYS after the zero-shot model saving,
-    # as it adds masking nn.Module attributes (e.g. .weight, .weight_orig, .weight_mask, etc.)
-
-    print_params_summary(model)
-    print_mask_summary(model, "by_layer")
-
-    if cfg.training.ft_type == "masked":
-        model.module.image_encoder.pick_params_to_prune_by_nn(cfg.training.masked_pct)
-        print_params_summary(model)
-        print_mask_summary(model, "by_nn")
-
-    # OUR STUFF
     template_core: NNTemplateCore = NNTemplateCore(
         restore_cfg=cfg.train.get("restore", None),
     )
+
+    logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
+
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
+
+    if cfg.reset_pretrained_model:
+        image_encoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
+
+        classification_head = get_classification_head(
+            cfg.nn.module.model.model_name,
+            cfg.nn.data.train_dataset,
+            cfg.nn.data.data_path,
+            cfg.misc.ckpt_path,
+            cache_dir=cfg.misc.cache_dir,
+            openclip_cachedir=cfg.misc.openclip_cachedir,
+        )
+
+        model = hydra.utils.instantiate(
+            cfg.nn.module, encoder=image_encoder, classifier=classification_head, _recursive_=False
+        )
+
+        upload_model_to_wandb(model, zeroshot_identifier, logger.experiment, cfg)
+
+    else:
+        model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
+
+    dataset = get_dataset(
+        cfg.nn.data.train_dataset,
+        preprocess_fn=model.encoder.train_preprocess,
+        location=cfg.nn.data.data_path,
+        batch_size=cfg.nn.data.batch_size.train,
+    )
+
+    model.freeze_head()
+
     callbacks: List[Callback] = build_callbacks(cfg.train.callbacks, template_core)
 
     storage_dir: str = cfg.core.storage_dir
-
-    logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
     pylogger.info("Instantiating the <Trainer>")
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
+        max_epochs=cfg.nn.data.dataset.ft_epochs,
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
     )
 
-    print(trainer, loss, scheduler)
-
     pylogger.info("Starting training!")
+    trainer.fit(model=model, train_dataloaders=dataset.train_loader, ckpt_path=template_core.trainer_ckpt_path)
 
-    # trainer.fit(model=model, train_dataloaders=dataset., ckpt_path=template_core.trainer_ckpt_path)
+    pylogger.info("Starting testing!")
+    trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    # if "test" in cfg.nn.data.dataset and trainer.checkpoint_callback.best_model_path is not None:
-    #     pylogger.info("Starting testing!")
-    #     trainer.test(datamodule=datamodule)
+    artifact_name = f"{cfg.nn.data.dataset.dataset_name}_{cfg.nn.module.model.model_name}_{cfg.seed_index}"
+    upload_model_to_wandb(model, artifact_name, logger.experiment, cfg)
 
-    # if logger is not None:
-    #     logger.experiment.finish()
+    if logger is not None:
+        logger.experiment.finish()
 
-    # # Evaluate
-    # image_encoder = model.module.image_encoder
-    # evaluate(image_encoder, args)
 
-    # if args.save is not None:
-    #     zs_path = os.path.join(cfg.misc.ckpt_path, "zeroshot.pt")
+def upload_model_to_wandb(model: LightningModule, artifact_name, run, cfg: DictConfig):
+    pylogger.info(f"Uploading artifact {artifact_name}")
 
-    # if cfg.training.ft_type == "full":
-    #     ft_path = os.path.join(
-    #         cfg.misc.ckpt_path,
-    #         f"finetuned_{cfg.training.ft_type}"
-    #         + ("_seed_" + str(cfg.seed_index) if cfg.seed_index is not None else "")
-    #         + ".pt",
-    #     )
-    #     image_encoder.save(ft_path)
+    trainer = pl.Trainer(
+        plugins=[NNCheckpointIO(jailing_dir="./tmp")],
+    )
 
-    # elif cfg.training.ft_type == "masked":
-    #     ft_path = os.path.join(
-    #         cfg.misc.ckpt_path,
-    #         f"finetuned_{cfg.training.ft_type}_pct_{str(int(cfg.training.masked_pct * 100))}"
-    #         + ("_seed_" + str(cfg.seed_index) if cfg.seed_index is not None else "")
-    #         + "_with_pruning_metadata.pt",
-    #     )
-    #     image_encoder.save(ft_path)
+    temp_path = "temp_checkpoint.ckpt"
 
-    #     image_encoder.make_pruning_effective()
-    #     ft_path = ft_path.replace("_with_pruning_metadata", "")
-    #     image_encoder.save(ft_path)
+    trainer.strategy.connect(model)
+    trainer.save_checkpoint(temp_path)
 
-    return None
+    model_class = model.__class__.__module__ + "." + model.__class__.__qualname__
+
+    model_artifact = wandb.Artifact(
+        name=artifact_name,
+        type="checkpoint",
+        metadata={"model_identifier": cfg.nn.module.model.model_name, "model_class": model_class},
+    )
+
+    model_artifact.add_file(temp_path + ".zip", name="trained.ckpt.zip")
+    run.log_artifact(model_artifact)
+
+    os.remove(temp_path + ".zip")
 
 
 @hydra.main(config_path=str(PROJECT_ROOT / "conf"), config_name="finetune.yaml")

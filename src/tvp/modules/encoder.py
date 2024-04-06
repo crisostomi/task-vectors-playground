@@ -68,45 +68,45 @@ class ImageEncoder(torch.nn.Module):
     # NOTE this and the following base result in the same percentage of frozen params for each layer
     # TODO eval what is the best approach and keep only one
     # https://pytorch.org/tutorials/intermediate/pruning_tutorial.html#pruning-a-module
-    def pick_params_to_prune_by_layers(self, pct: float):
-        for name, module in self.named_modules():
-            if not hasattr(module, "weight"):
-                continue
+    # def pick_params_to_prune_by_layers(self, pct: float):
+    #     for name, module in self.named_modules():
+    #         if not hasattr(module, "weight"):
+    #             continue
 
-            if not any(substring in name for substring in self.MODULE_NAMES_ELIGIBLE_FOR_FREEZING):
-                continue
+    #         if not any(substring in name for substring in self.MODULE_NAMES_ELIGIBLE_FOR_FREEZING):
+    #             continue
 
-            prune.random_unstructured(module, name="weight", amount=pct)
+    #         prune.random_unstructured(module, name="weight", amount=pct)
 
-    # https://pytorch.org/tutorials/intermediate/pruning_tutorial.html#global-pruning
-    def pick_params_to_prune_by_nn(self, pct: float):
-        modules_to_freeze = []
+    # # https://pytorch.org/tutorials/intermediate/pruning_tutorial.html#global-pruning
+    # def pick_params_to_prune_by_nn(self, pct: float):
+    #     modules_to_freeze = []
 
-        for name, module in self.named_modules():
-            if not hasattr(module, "weight"):
-                continue
+    #     for name, module in self.named_modules():
+    #         if not hasattr(module, "weight"):
+    #             continue
 
-            if not any(substring in name for substring in self.MODULE_NAMES_ELIGIBLE_FOR_FREEZING):
-                continue
+    #         if not any(substring in name for substring in self.MODULE_NAMES_ELIGIBLE_FOR_FREEZING):
+    #             continue
 
-            modules_to_freeze.append((module, "weight"))
+    #         modules_to_freeze.append((module, "weight"))
 
-        prune.global_unstructured(
-            modules_to_freeze,
-            pruning_method=prune.RandomUnstructured,
-            amount=pct,
-        )
+    #     prune.global_unstructured(
+    #         modules_to_freeze,
+    #         pruning_method=prune.RandomUnstructured,
+    #         amount=pct,
+    #     )
 
-    # NOTE alternative name: remove_pruning_metadata
-    def make_pruning_effective(self):
-        for name, module in self.named_modules():
-            if not hasattr(module, "weight"):
-                continue
+    # # NOTE alternative name: remove_pruning_metadata
+    # def make_pruning_effective(self):
+    #     for name, module in self.named_modules():
+    #         if not hasattr(module, "weight"):
+    #             continue
 
-            if not any(substring in name for substring in self.MODULE_NAMES_ELIGIBLE_FOR_FREEZING):
-                continue
+    #         if not any(substring in name for substring in self.MODULE_NAMES_ELIGIBLE_FOR_FREEZING):
+    #             continue
 
-            prune.remove(module, "weight")
+    #         prune.remove(module, "weight")
 
 
 class ClassificationHead(torch.nn.Linear):

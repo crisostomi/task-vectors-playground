@@ -21,6 +21,7 @@ from tvp.data.datamodule import MetaData
 from tvp.task_vectors.task_vectors import TaskVector
 from tvp.utils.args import parse_arguments
 from tvp.utils.eval import eval_single_dataset, evaluate
+from tvp.utils.io_utils import load_model_from_artifact
 
 pylogger = logging.getLogger(__name__)
 
@@ -59,40 +60,33 @@ def run(cfg: DictConfig) -> str:
 
     cfg.core.tags = enforce_tags(cfg.core.get("tags", None))
 
-    # Config
-    datasets_finetuned_name = {
-        task_vector: f"finetuned_full_seed_{cfg.seed_index}.pt" for task_vector in cfg.task_vectors.to_apply
-    }
-
-    model = cfg.model.model
-    pretrained_checkpoint = cfg.misc.pretrained_checkpoint
-
-    # Create the task vectors
-    task_vectors = [
-        TaskVector(
-            pretrained_checkpoint, f"{PROJECT_ROOT}/checkpoints/{model}/{dataset}/{datasets_finetuned_name[dataset]}"
-        )
-        for dataset in cfg.task_vectors.to_apply
-    ]
-
-    # Sum the task vectors
-    task_vector_sum = sum(task_vectors)
-
-    # Apply the resulting task vector
-    image_encoder = task_vector_sum.apply_to(pretrained_checkpoint, scaling_coef=cfg.task_vectors.scaling_coefficient)
-
-    # Evaluate
-    evaluate(image_encoder, cfg)
-
-    # Instantiate the callbacks
     template_core: NNTemplateCore = NNTemplateCore(
         restore_cfg=cfg.train.get("restore", None),
     )
-    print(template_core)
+    logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
+
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
+
+    zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
+
+    finetuned_id_fn = lambda dataset: f"{dataset}_{cfg.nn.module.model.model_name}_{cfg.seed_index}:latest"
+
+    finetuned_models = {
+        dataset: load_model_from_artifact(artifact_path=finetuned_id_fn(dataset), run=logger.experiment)
+        for dataset in cfg.task_vectors.to_apply
+    }
+
+    task_vectors = [TaskVector(zeroshot_model, finetuned_models[dataset]) for dataset in cfg.task_vectors.to_apply]
+
+    task_vector_sum = sum(task_vectors)
+
+    # Apply the resulting task vector
+    image_encoder = task_vector_sum.apply_to(zeroshot_model, scaling_coef=cfg.task_vectors.scaling_coefficient)
+    print(image_encoder)
+
+    # evaluate(image_encoder, cfg)
 
     # callbacks: List[Callback] = build_callbacks(cfg.train.callbacks, template_core)
-
-    # logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
     # # Instantiate datamodule
     # pylogger.info(f"Instantiating <{cfg.nn.data['_target_']}>")

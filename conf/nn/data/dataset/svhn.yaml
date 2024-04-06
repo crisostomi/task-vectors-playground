@@ -1,0 +1,2 @@
+dataset_name: SVHN
+ft_epochs: 4

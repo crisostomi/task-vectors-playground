@@ -2,6 +2,7 @@
 core:
   project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
+  entity: gladia
   version: 0.0.1
   tags: null
 
