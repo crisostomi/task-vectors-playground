@@ -1,9 +1,16 @@
+import logging
 import os
 import pickle
 from pathlib import Path
+from typing import List
 
+import hydra
 import numpy as np
 import torch
+from omegaconf import ListConfig
+from pytorch_lightning import Callback
+
+pylogger = logging.getLogger(__name__)
 
 
 def assign_learning_rate(param_group, new_lr):
@@ -121,3 +128,22 @@ class LabelSmoothing(torch.nn.Module):
         smooth_loss = -logprobs.mean(dim=-1)
         loss = self.confidence * nll_loss + self.smoothing * smooth_loss
         return loss.mean()
+
+
+def build_callbacks(cfg: ListConfig, *args: Callback) -> List[Callback]:
+    """Instantiate the callbacks given their configuration.
+
+    Args:
+        cfg: a list of callbacks instantiable configuration
+        *args: a list of extra callbacks already instantiated
+
+    Returns:
+        the complete list of callbacks to use
+    """
+    callbacks: List[Callback] = list(args)
+
+    for callback in cfg:
+        pylogger.info(f"Adding callback <{callback['_target_'].split('.')[-1]}>")
+        callbacks.append(hydra.utils.instantiate(callback, _recursive_=False))
+
+    return callbacks

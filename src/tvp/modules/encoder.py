@@ -7,7 +7,7 @@ from tvp.utils.utils import torch_load, torch_save
 
 
 class ImageEncoder(torch.nn.Module):
-    def __init__(self, model_name, openclip_cachedir, cache_dir, keep_lang=False):
+    def __init__(self, model_name: str, openclip_cachedir=None, cache_dir=None, keep_lang=False, **kwargs):
         super().__init__()
 
         print(f"Loading {model_name} pre-trained weights.")
@@ -110,9 +110,13 @@ class ImageEncoder(torch.nn.Module):
 
 
 class ClassificationHead(torch.nn.Linear):
-    def __init__(self, normalize, weights, biases=None):
-        output_size, input_size = weights.shape
-        super().__init__(input_size, output_size)
+    def __init__(self, normalize, input_size=None, num_classes=None, weights=None, biases=None, **kwargs):
+        assert (input_size is not None and num_classes is not None) or weights is not None
+
+        if weights is not None:
+            input_size, num_classes = weights.shape
+
+        super().__init__(input_size, num_classes)
         self.normalize = normalize
         if weights is not None:
             self.weight = torch.nn.Parameter(weights.clone())

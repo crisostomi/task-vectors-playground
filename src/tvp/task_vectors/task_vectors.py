@@ -46,18 +46,9 @@ class TaskVector:
                 new_vector[key] = -self.vector[key]
         return TaskVector(vector=new_vector)
 
-    def apply_to(self, pretrained_checkpoint=None, pretrained_model=None, scaling_coef=1.0):
+    def apply_to(self, pretrained_model, scaling_coef=1.0):
         """Apply a task vector to a pretrained model."""
-        if pretrained_checkpoint is None and pretrained_model is None:
-            raise ValueError("Either a pretrained checkpoint or a pretrained model must be provided.")
-
-        if pretrained_checkpoint is not None and pretrained_model is not None:
-            raise ValueError("Only one of pretrained_checkpoint and pretrained_model should be provided.")
-
         with torch.no_grad():
-            if pretrained_checkpoint is not None:
-                pretrained_model = torch.load(pretrained_checkpoint)
-
             new_state_dict = {}
             pretrained_state_dict = pretrained_model.state_dict()
 

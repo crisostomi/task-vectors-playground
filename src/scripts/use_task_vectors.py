@@ -3,8 +3,8 @@ import os
 from typing import List, Optional
 
 import hydra
-import lightning.pytorch as pl
 import omegaconf
+import pytorch_lightning as pl
 import torch
 from lightning.pytorch import Callback
 from omegaconf import DictConfig, ListConfig
@@ -18,33 +18,14 @@ from nn_core.serialization import NNCheckpointIO
 # Force the execution of __init__.py if this file is executed directly.
 import tvp  # noqa
 from tvp.data.datamodule import MetaData
+from tvp.data.datasets.registry import get_dataset
 from tvp.task_vectors.task_vectors import TaskVector
-from tvp.utils.args import parse_arguments
-from tvp.utils.eval import eval_single_dataset, evaluate
 from tvp.utils.io_utils import load_model_from_artifact
+from tvp.utils.utils import build_callbacks
 
 pylogger = logging.getLogger(__name__)
 
 torch.set_float32_matmul_precision("high")
-
-
-def build_callbacks(cfg: ListConfig, *args: Callback) -> List[Callback]:
-    """Instantiate the callbacks given their configuration.
-
-    Args:
-        cfg: a list of callbacks instantiable configuration
-        *args: a list of extra callbacks already instantiated
-
-    Returns:
-        the complete list of callbacks to use
-    """
-    callbacks: List[Callback] = list(args)
-
-    for callback in cfg:
-        pylogger.info(f"Adding callback <{callback['_target_'].split('.')[-1]}>")
-        callbacks.append(hydra.utils.instantiate(callback, _recursive_=False))
-
-    return callbacks
 
 
 def run(cfg: DictConfig) -> str:
@@ -69,7 +50,7 @@ def run(cfg: DictConfig) -> str:
 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
-    finetuned_id_fn = lambda dataset: f"{dataset}_{cfg.nn.module.model.model_name}_{cfg.seed_index}:latest"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:latest"
 
     finetuned_models = {
         dataset: load_model_from_artifact(artifact_path=finetuned_id_fn(dataset), run=logger.experiment)
@@ -82,57 +63,44 @@ def run(cfg: DictConfig) -> str:
 
     # Apply the resulting task vector
     image_encoder = task_vector_sum.apply_to(zeroshot_model, scaling_coef=cfg.task_vectors.scaling_coefficient)
-    print(image_encoder)
 
-    # evaluate(image_encoder, cfg)
+    classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
+    classification_head = load_model_from_artifact(
+        artifact_path=f"{classification_head_identifier}:latest", run=logger.experiment
+    )
 
-    # callbacks: List[Callback] = build_callbacks(cfg.train.callbacks, template_core)
+    model = hydra.utils.instantiate(
+        cfg.nn.module, encoder=image_encoder, classifier=classification_head, _recursive_=False
+    )
 
-    # # Instantiate datamodule
-    # pylogger.info(f"Instantiating <{cfg.nn.data['_target_']}>")
-    # datamodule: pl.LightningDataModule = hydra.utils.instantiate(cfg.nn.data, _recursive_=False)
-    # datamodule.setup(stage=None)
+    dataset = get_dataset(
+        cfg.nn.data.train_dataset,
+        preprocess_fn=model.encoder.train_preprocess,
+        location=cfg.nn.data.data_path,
+        batch_size=cfg.nn.data.batch_size.train,
+    )
 
-    # metadata: Optional[MetaData] = getattr(datamodule, "metadata", None)
-    # if metadata is None:
-    #     pylogger.warning(f"No 'metadata' attribute found in datamodule <{datamodule.__class__.__name__}>")
+    callbacks: List[Callback] = build_callbacks(cfg.train.callbacks, template_core)
 
-    # # Instantiate model
-    # pylogger.info(f"Instantiating <{cfg.nn.module['_target_']}>")
-    # model: pl.LightningModule = hydra.utils.instantiate(cfg.nn.module, _recursive_=False, metadata=metadata)
+    storage_dir: str = cfg.core.storage_dir
 
-    # # Instantiate the callbacks
-    # template_core: NNTemplateCore = NNTemplateCore(
-    #     restore_cfg=cfg.train.get("restore", None),
-    # )
-    # callbacks: List[Callback] = build_callbacks(cfg.train.callbacks, template_core)
+    pylogger.info("Instantiating the <Trainer>")
+    trainer = pl.Trainer(
+        default_root_dir=storage_dir,
+        plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
+        logger=logger,
+        callbacks=callbacks,
+        **cfg.train.trainer,
+    )
 
-    # storage_dir: str = cfg.core.storage_dir
+    pylogger.info("Starting training!")
+    trainer.fit(model=model, train_dataloaders=dataset.train_loader, ckpt_path=template_core.trainer_ckpt_path)
 
-    # logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
+    pylogger.info("Starting testing!")
+    trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    # pylogger.info("Instantiating the <Trainer>")
-    # trainer = pl.Trainer(
-    #     default_root_dir=storage_dir,
-    #     plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-    #     logger=logger,
-    #     callbacks=callbacks,
-    #     **cfg.train.trainer,
-    # )
-
-    # pylogger.info("Starting training!")
-    # trainer.fit(model=model, datamodule=datamodule, ckpt_path=template_core.trainer_ckpt_path)
-
-    # if fast_dev_run:
-    #     pylogger.info("Skipping testing in 'fast_dev_run' mode!")
-    # else:
-    #     if datamodule.test_dataset is not None and trainer.checkpoint_callback.best_model_path is not None:
-    #         pylogger.info("Starting testing!")
-    #         trainer.test(datamodule=datamodule)
-
-    # Logger closing to release resources/avoid multi-run conflicts
-    # if logger is not None:
-    # logger.experiment.finish()
+    if logger is not None:
+        logger.experiment.finish()
 
     return None
 
@@ -144,16 +112,3 @@ def main(cfg: omegaconf.DictConfig):
 
 if __name__ == "__main__":
     main()
-
-
-# Evaluate # NOTE this evaluates on the training set, not the validation set
-# for dataset in args.apply_task_vectors:
-#     eval_single_dataset(image_encoder, dataset, args)
-#     pass
-
-# Save model with applied task vectors
-# datasets_str = '_and_'.join(args.apply_task_vectors)
-# export_path = f'checkpoints/{model}/{datasets_str}'
-# os.makedirs(export_path, exist_ok=True)
-# if args.save is not None:
-#     image_encoder.save(f"{export_path}/finetuned_full_seed_{args.manual_seed}_scaling_coeff_{args.tv_scaling_coeff}.pt")
