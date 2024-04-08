@@ -114,9 +114,9 @@ class ClassificationHead(torch.nn.Linear):
         assert (input_size is not None and num_classes is not None) or weights is not None
 
         if weights is not None:
-            input_size, num_classes = weights.shape
+            num_classes, input_size = weights.shape
 
-        super().__init__(input_size, num_classes)
+        super().__init__(in_features=input_size, out_features=num_classes)
         self.normalize = normalize
         if weights is not None:
             self.weight = torch.nn.Parameter(weights.clone())

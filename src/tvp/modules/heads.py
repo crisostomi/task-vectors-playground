@@ -53,11 +53,6 @@ def build_classification_head(model, dataset_name, template, data_location, devi
 def get_classification_head(model, dataset, data_path, ckpt_path, cache_dir, openclip_cachedir, device="cuda"):
     filename = os.path.join(ckpt_path, f"head_{dataset}.pt")
 
-    if os.path.exists(filename):
-        print(f"Classification head for {model} on {dataset} exists at {filename}")
-        return ClassificationHead.load(filename)
-
-    print(f"Did not find classification head for {model} on {dataset} at {filename}, building one from scratch.")
     model = ImageEncoder(model, cache_dir=cache_dir, openclip_cachedir=openclip_cachedir, keep_lang=True).model
     template = get_templates(dataset)
     classification_head = build_classification_head(model, dataset, template, data_path, device)

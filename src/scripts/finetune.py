@@ -50,7 +50,7 @@ def run(cfg: DictConfig):
         upload_model_to_wandb(image_encoder, zeroshot_identifier, logger.experiment, cfg, metadata)
 
     else:
-        model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
+        image_encoder = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     if cfg.reset_classification_head:
         classification_head = get_classification_head(
