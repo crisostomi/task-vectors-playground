@@ -7,7 +7,7 @@ trainer:
   accelerator: 'gpu'
   devices: 1
   precision: 32
-  max_steps: 10 #-1
+  max_steps: -1
   num_sanity_val_steps: 2
   gradient_clip_val: 10.0
   val_check_interval: 1.0
@@ -50,7 +50,7 @@ logging:
     _target_: lightning.pytorch.loggers.WandbLogger
 
     project: ${core.project_name}
-    entity: null
+    entity: gladia
     log_model: false
     mode: 'online'
     tags: ${core.tags}

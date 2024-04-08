@@ -93,10 +93,10 @@ def run(cfg: DictConfig) -> str:
         **cfg.train.trainer,
     )
 
-    pylogger.info("Starting training!")
-    trainer.fit(model=model, train_dataloaders=dataset.train_loader, ckpt_path=template_core.trainer_ckpt_path)
+    pylogger.info("Evaluating on the training set")
+    trainer.test(model=model, dataloaders=dataset.train_loader)
 
-    pylogger.info("Starting testing!")
+    pylogger.info("Evaluating on the test set!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
     if logger is not None:

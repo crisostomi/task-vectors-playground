@@ -1,14 +1,13 @@
 import logging
 import os
 import time
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import hydra
 import omegaconf
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import torch.nn.utils.prune as prune
 import wandb
 from omegaconf import DictConfig, ListConfig
 from pytorch_lightning import Callback, LightningModule
@@ -20,15 +19,12 @@ from nn_core.common.utils import enforce_tags, seed_index_everything
 from nn_core.model_logging import NNLogger
 from nn_core.serialization import NNCheckpointIO
 
-from tvp.data.datasets.common import get_dataloader, maybe_dictionarize
 from tvp.data.datasets.registry import get_dataset
 from tvp.modules.encoder import ImageEncoder
 from tvp.modules.heads import get_classification_head
 from tvp.pl_module.image_classifier import ImageClassifier
-from tvp.utils.args import parse_arguments
-from tvp.utils.eval import evaluate
 from tvp.utils.io_utils import get_class, load_model_from_artifact
-from tvp.utils.utils import LabelSmoothing, build_callbacks, cosine_lr, print_mask_summary, print_params_summary
+from tvp.utils.utils import LabelSmoothing, build_callbacks
 
 pylogger = logging.getLogger(__name__)
 torch.set_float32_matmul_precision("high")
@@ -47,7 +43,7 @@ def run(cfg: DictConfig):
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
-        image_encoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
+        image_encoder: ImageEncoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
         model_class = get_class(image_encoder)
 
         metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class}
@@ -83,7 +79,7 @@ def run(cfg: DictConfig):
             artifact_path=f"{classification_head_identifier}:latest", run=logger.experiment
         )
 
-    model = hydra.utils.instantiate(
+    model: ImageClassifier = hydra.utils.instantiate(
         cfg.nn.module, encoder=image_encoder, classifier=classification_head, _recursive_=False
     )
 
