@@ -227,3 +227,4 @@ checkpoints/
 ./data/
 artifacts/
 outputs/
+/data
