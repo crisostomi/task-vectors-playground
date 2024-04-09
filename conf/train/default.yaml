@@ -58,3 +58,4 @@ logging:
   wandb_watch:
     log: null
     log_freq: 100
+    log_graph: false
