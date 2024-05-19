@@ -61,8 +61,12 @@ def run(cfg: DictConfig) -> str:
 
     task_vector_sum = sum(task_vectors)
 
+    task_vector_mean = task_vector_sum / len(task_vectors)
+
+    task_vector_normalized = task_vector_mean / task_vector_mean.norm()
+
     # Apply the resulting task vector
-    image_encoder = task_vector_sum.apply_to(zeroshot_model, scaling_coef=cfg.task_vectors.scaling_coefficient)
+    image_encoder = task_vector_mean.apply_to(zeroshot_model, scaling_coef=cfg.task_vectors.scaling_coefficient)
 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
     classification_head = load_model_from_artifact(
@@ -93,8 +97,8 @@ def run(cfg: DictConfig) -> str:
         **cfg.train.trainer,
     )
 
-    pylogger.info("Evaluating on the training set")
-    trainer.test(model=model, dataloaders=dataset.train_loader)
+    # pylogger.info("Evaluating on the training set")
+    # trainer.test(model=model, dataloaders=dataset.train_loader)
 
     pylogger.info("Evaluating on the test set!")
     trainer.test(model=model, dataloaders=dataset.test_loader)

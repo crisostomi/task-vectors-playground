@@ -38,6 +38,14 @@ class TaskVector:
             return self
         return self.__add__(other)
 
+    def __truediv__(self, scalar):
+        """Divide a task vector by a scalar."""
+        with torch.no_grad():
+            new_vector = {}
+            for key in self.vector:
+                new_vector[key] = self.vector[key] / scalar
+        return TaskVector(vector=new_vector)
+
     def __neg__(self):
         """Negate a task vector."""
         with torch.no_grad():
@@ -62,3 +70,10 @@ class TaskVector:
         pretrained_model.load_state_dict(new_state_dict, strict=False)
 
         return pretrained_model
+
+    def norm(self):
+        """Compute the norm of the task vector."""
+        with torch.no_grad():
+            flattened = torch.cat([self.vector[key].flatten() for key in self.vector])
+            norm = torch.norm(flattened)
+        return norm
