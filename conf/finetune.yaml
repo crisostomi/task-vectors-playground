@@ -15,7 +15,7 @@ defaults:
 seed_index: 0
 
 reset_pretrained_model: false
-reset_classification_head: false
+reset_classification_head: true
 
 conventions:
   x_key: 'x'

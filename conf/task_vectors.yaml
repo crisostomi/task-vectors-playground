@@ -22,7 +22,7 @@ conventions:
 
 task_vectors:
   to_apply:
-    # - SVHN
+    - SVHN
     - MNIST
     - CIFAR100
   scaling_coefficient: 1 #0.8
