@@ -63,8 +63,6 @@ def run(cfg: DictConfig) -> str:
 
     task_vector_mean = task_vector_sum / len(task_vectors)
 
-    task_vector_normalized = task_vector_mean / task_vector_mean.norm()
-
     # Apply the resulting task vector
     image_encoder = task_vector_mean.apply_to(zeroshot_model, scaling_coef=cfg.task_vectors.scaling_coefficient)
 

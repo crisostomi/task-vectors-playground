@@ -3,8 +3,6 @@ defaults:
   - _self_
 
 data_path: "${oc.env:PROJECT_ROOT}/data"
-eval_datasets:
-  - ${nn.data.dataset.dataset_name}
 
 train_dataset: "${nn.data.dataset.dataset_name}Val" # TODO: why val?
 

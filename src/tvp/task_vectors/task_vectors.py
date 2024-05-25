@@ -1,79 +1,69 @@
 import torch
 
 
-class TaskVector:
-    def __init__(self, pretrained_checkpoint=None, finetuned_checkpoint=None, vector=None):
-        """Initializes the task vector from a pretrained and a finetuned checkpoints.
+class TaskVector(torch.Tensor):
 
-        This can either be done by passing two state dicts (one corresponding to the
-        pretrained model, and another to the finetuned model), or by directly passying in
-        the task vector state dict.
-        """
-        if vector is not None:
-            self.vector = vector
-        else:
-            assert pretrained_checkpoint is not None and finetuned_checkpoint is not None
-            with torch.no_grad():
-                pretrained_state_dict = pretrained_checkpoint.state_dict()
-                finetuned_state_dict = finetuned_checkpoint.state_dict()
-                self.vector = {}
-                for key in pretrained_state_dict:
-                    if pretrained_state_dict[key].dtype in [torch.int64, torch.uint8]:
-                        continue
-                    self.vector[key] = finetuned_state_dict[key] - pretrained_state_dict[key]
+    def __new__(cls, vector, reference_model=None):
+        return super().__new__(cls, vector)
 
-    def __add__(self, other):
-        """Add two task vectors together."""
+    def __init__(self, vector, reference_model=None):
+        # No need to call the base class __init__ method
+        self.reference_model = reference_model
+
+    @staticmethod
+    def from_models(pretrained_model, finetuned_model):
+        """Create a task vector from a pretrained model and a finetuned one."""
         with torch.no_grad():
-            new_vector = {}
-            for key in self.vector:
-                if key not in other.vector:
-                    print(f"Warning, key {key} is not present in both task vectors.")
+            pretrained_state_dict = pretrained_model.state_dict()
+            finetuned_state_dict = finetuned_model.state_dict()
+
+            parameters = []
+            for key in pretrained_state_dict:
+                # batchnorm statistics and similar information
+                if pretrained_state_dict[key].dtype in [torch.int64, torch.uint8]:
+                    print(f"Skipping key {key}")
                     continue
-                new_vector[key] = self.vector[key] + other.vector[key]
-        return TaskVector(vector=new_vector)
+                difference = finetuned_state_dict[key] - pretrained_state_dict[key]
+                difference = difference.flatten()
+                parameters.append(difference)
 
-    def __radd__(self, other):
-        if other is None or isinstance(other, int):
-            return self
-        return self.__add__(other)
+        return TaskVector(torch.cat(parameters), reference_model=pretrained_model)
 
-    def __truediv__(self, scalar):
-        """Divide a task vector by a scalar."""
-        with torch.no_grad():
-            new_vector = {}
-            for key in self.vector:
-                new_vector[key] = self.vector[key] / scalar
-        return TaskVector(vector=new_vector)
+    def to_parameters(self):
+        return torch.nn.utils.vector_to_parameters(self, self.reference_model.parameters())
 
-    def __neg__(self):
-        """Negate a task vector."""
-        with torch.no_grad():
-            new_vector = {}
-            for key in self.vector:
-                new_vector[key] = -self.vector[key]
-        return TaskVector(vector=new_vector)
-
-    def apply_to(self, pretrained_model, scaling_coef=1.0):
+    def apply_to(self, target_model, scaling_coef=1.0):
         """Apply a task vector to a pretrained model."""
         with torch.no_grad():
             new_state_dict = {}
-            pretrained_state_dict = pretrained_model.state_dict()
 
-            for key in pretrained_state_dict:
+            state_dict = self.to_state_dict()
+            target_model_state_dict = target_model.state_dict()
+
+            for key in state_dict:
                 if key not in self.vector:
                     print(f"Warning: key {key} is present in the pretrained state dict but not in the task vector")
                     continue
 
-                new_state_dict[key] = pretrained_state_dict[key] + scaling_coef * self.vector[key]
+                new_state_dict[key] = target_model_state_dict[key] + scaling_coef * self.vector[key]
 
-        pretrained_model.load_state_dict(new_state_dict, strict=False)
+        target_model.load_state_dict(new_state_dict, strict=False)
 
-        return pretrained_model
+        return target_model
 
-    def norm(self):
-        """Compute the norm of the task vector."""
-        with torch.no_grad():
-            flattened = torch.cat([self.vector[key].flatten() for key in self.vector])
-            norm = torch.norm(flattened)
-        return norm
+    def to_state_dict(self):
+        """
+        Convert a flattened parameter vector into a state_dict for the model.
+        """
+        state_dict = self.reference_model.state_dict()
+
+        pointer = 0
+        for name, param in state_dict.items():
+            num_param = param.numel()  # Number of elements in the parameter
+
+            # Replace the original parameter with the corresponding part of the vector
+            state_dict[name].copy_(self[pointer : pointer + num_param].view_as(param))
+
+            pointer += num_param
+
+        return state_dict

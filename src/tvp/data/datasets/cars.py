@@ -121,9 +121,6 @@ class PytorchStanfordCars(VisionDataset):
             print(f'{self._base_folder / "devkit"} does not exist')
             return False
 
-        print(f"self._annotations_mat_path: {self._annotations_mat_path}")
-        print(f"self._images_base_path: {self._images_base_path}")
-
         return self._annotations_mat_path.exists() and self._images_base_path.is_dir()
 
 
@@ -131,7 +128,6 @@ class Cars:
     def __init__(self, preprocess, location=os.path.expanduser("~/data"), batch_size=32, num_workers=16):
         # Data loading code
 
-        print(location)
         self.train_dataset = PytorchStanfordCars(location, "train", preprocess, download=False)
         self.train_loader = torch.utils.data.DataLoader(
             self.train_dataset,
