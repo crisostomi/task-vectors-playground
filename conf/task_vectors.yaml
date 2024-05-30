@@ -22,23 +22,23 @@ conventions:
 eval_datasets:
   - Cars
   - CIFAR100
-  - DTD
-  - EuroSAT
-  - GTSRB
-  - MNIST
-  - RESISC45
-  - SVHN
+  # - DTD
+  # - EuroSAT
+  # - GTSRB
+  # - MNIST
+  # - RESISC45
+  # - SVHN
 
 task_vectors:
   to_apply:
     - Cars
     - CIFAR100
-    - DTD
-    - EuroSAT
-    - GTSRB
-    - MNIST
-    - RESISC45
-    - SVHN
+    # - DTD
+    # - EuroSAT
+    # - GTSRB
+    # - MNIST
+    # - RESISC45
+    # - SVHN
 
   scaling_coefficient: 1 #0.8
 
