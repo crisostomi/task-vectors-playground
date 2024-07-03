@@ -89,7 +89,7 @@ class ImageClassifier(pl.LightningModule):
         result = self._step(batch=batch, split="train")        
         return result
     
-    def on_train_batch_end(self) -> None:
+    def on_train_batch_end(self, outputs, batch, batch_idx):
         self.encoder.reset_weights_by_percentile(percentile=0.01)
 
     def validation_step(self, batch: Any, batch_idx: int) -> Mapping[str, Any]:
