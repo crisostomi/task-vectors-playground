@@ -1,0 +1,12 @@
+defaults:
+  - _self_
+  - data: default
+  - module: default
+
+#  lr_scheduler:
+#    _target_: torch.optim.lr_scheduler.CosineAnnealingWarmRestarts
+#    T_0: 20
+#    T_mult: 1
+#    eta_min: 0
+#    last_epoch: -1
+#    verbose: False
