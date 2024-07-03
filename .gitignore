@@ -228,3 +228,5 @@ checkpoints/
 artifacts/
 outputs/
 /data
+
+temp_checkpoint.ckpt

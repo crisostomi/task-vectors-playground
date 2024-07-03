@@ -31,7 +31,7 @@ class ImageClassifier(pl.LightningModule):
         # Be careful when modifying this instruction. If in doubt, don't do it :]
         self.save_hyperparameters(logger=False, ignore=("metadata",))
 
-        self.sparsity_percentile = 0.01
+        self.sparsity_percentile = 0.1
 
         self.metadata = metadata
         self.num_classes = classifier.out_features
@@ -93,7 +93,7 @@ class ImageClassifier(pl.LightningModule):
         return result
     
     def on_train_batch_end(self, outputs, batch, batch_idx):
-        self.encoder.reset_weights_by_percentile(percentile=self.sparsity_percentile )
+        self.encoder.reset_weights_by_percentile(percentile=self.sparsity_percentile)
 
     def validation_step(self, batch: Any, batch_idx: int) -> Mapping[str, Any]:
         return self._step(batch=batch, split="val")
