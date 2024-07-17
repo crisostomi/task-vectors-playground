@@ -24,6 +24,7 @@ class ImageEncoder(torch.nn.Module):
 
         self.pretrained_state_dict = self.get_pretrained_weights()
         self.cache_dir = cache_dir
+        self.tv_mask = None
 
         if not keep_lang and hasattr(self.model, "transformer"):
             delattr(self.model, "transformer")
@@ -105,6 +106,20 @@ class ImageEncoder(torch.nn.Module):
         unchanged_percentage = (unchanged_params / total_params) * 100
         #print(f"Percentage of parameters that remained pretrained: {unchanged_percentage:.2f}%")
         return 100-unchanged_percentage
+    
+    def get_tv_sparsity_mask(self):
+        mask = {}
+        current_state_dict = self.model.state_dict()
+        
+        for name, current_param in current_state_dict.items():
+            pretrained_param = self.pretrained_state_dict[name].to(current_param.device)
+            mask[name] = (current_param != pretrained_param).int()  # 0 if same, 1 if different
+        return mask
+    
+    def create_tv_mask(self):
+        self.tv_mask = self.get_tv_sparsity_mask()
+
+
 
     # @classmethod
     # def load_from_state_dict(cls, model_name, state_dict):

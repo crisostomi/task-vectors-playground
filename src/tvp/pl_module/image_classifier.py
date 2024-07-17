@@ -43,6 +43,7 @@ class ImageClassifier(pl.LightningModule):
 
         self.encoder = encoder
         self.classification_head = classifier
+        self.encoder.create_tv_mask() # call this to create the TV sparsity mask in the encoder, the mask is applied to the gradient to prevent pruned weights from updating
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Method for the forward pass.
@@ -92,8 +93,22 @@ class ImageClassifier(pl.LightningModule):
         result = self._step(batch=batch, split="train")        
         return result
     
+    
+    """
     def on_train_batch_end(self, outputs, batch, batch_idx):
         self.encoder.reset_weights_by_percentile(percentile=self.sparsity_percentile)
+    """
+
+    """
+    def on_train_end(self):
+        self.encoder.reset_weights_by_percentile(percentile=self.sparsity_percentile)
+    """
+
+    def on_after_backward(self):
+        if self.encoder.tv_mask is not None:
+            for name, param in self.encoder.model.named_parameters():
+                if name in self.encoder.tv_mask and param.grad is not None:
+                    param.grad *= self.encoder.tv_mask[name].to(param.device)
 
     def validation_step(self, batch: Any, batch_idx: int) -> Mapping[str, Any]:
         return self._step(batch=batch, split="val")

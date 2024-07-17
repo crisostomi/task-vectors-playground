@@ -76,7 +76,8 @@ def run(cfg: DictConfig):
 
     else:
         classification_head = load_model_from_artifact(
-            artifact_path=f"{classification_head_identifier}:latest", run=logger.experiment
+            artifact_path=f"{classification_head_identifier}:latest", 
+            run=logger.experiment
         )
 
     model: ImageClassifier = hydra.utils.instantiate(
@@ -112,10 +113,14 @@ def run(cfg: DictConfig):
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}__PosthocClipping{str(model.sparsity_percentile)}"
+
 
     model_class = get_class(image_encoder)
-    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "sparseClipping"}
+    
+    #metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "sparseClipping"}
+    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "PosthocClipping"}
 
     upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
 
