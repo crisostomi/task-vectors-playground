@@ -39,7 +39,8 @@ def run(cfg: DictConfig):
 
     logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
+    # zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1"
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
@@ -101,7 +102,8 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        max_epochs=cfg.nn.data.dataset.ft_epochs,
+        #max_epochs=cfg.nn.data.dataset.ft_epochs,
+        max_epochs = cfg.nn.data.dataset.posthoc_epochs, 
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,

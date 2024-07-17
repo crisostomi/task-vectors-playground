@@ -1,5 +1,5 @@
 defaults:
-  - dataset: svhn
+  - dataset: stl10
   - _self_
 
 data_path: "${oc.env:PROJECT_ROOT}/data"
