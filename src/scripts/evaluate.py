@@ -77,9 +77,9 @@ def run(cfg: DictConfig) -> str:
         TaskVector.from_models(zeroshot_model, finetuned_models[dataset]) for dataset in cfg.task_vectors.to_apply
     ]
 
-    def apply_task_vector(model, task_vector, sparsity=1):
+    def apply_task_vector(model, task_vector, rescaling_coef=1):
         #model.load_state_dict({k: v + task_vector[k] for k, v in model.state_dict().items()})
-        model.load_state_dict({k: v + 1/(sparsity)*task_vector[k] for k, v in model.state_dict().items()})
+        model.load_state_dict({k: v + 1/(rescaling_coef)*task_vector[k] for k, v in model.state_dict().items()})
 
     with torch.no_grad():
         task_vectors = torch.stack(
@@ -92,8 +92,7 @@ def run(cfg: DictConfig) -> str:
     delta_model = copy.deepcopy(zeroshot_model)
     vector_to_parameters(multi_task_vector, delta_model.parameters())
     task_equipped_model = copy.deepcopy(zeroshot_model)
-    sparsity = 0.1
-    apply_task_vector(task_equipped_model, delta_model.state_dict(), sparsity=1/sparsity)
+    apply_task_vector(task_equipped_model, delta_model.state_dict(), rescaling_coef=cfg.task_vectors.rescaling_coefficient)
 
     seed_index_everything(cfg)
 

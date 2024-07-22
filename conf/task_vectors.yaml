@@ -41,7 +41,7 @@ task_vectors:
     - SVHN
 
   scaling_coefficient: 1 #0.8
-
+  rescaling_coefficient: 10
   aggregator:
     # _target_: tvp.task_vectors.aggregator.SphericalAggregator
     _target_: tvp.task_vectors.aggregator.SumAggregator
