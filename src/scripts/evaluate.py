@@ -61,7 +61,9 @@ def run(cfg: DictConfig) -> str:
 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
-    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:latest" 
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_PosthocClipAndTrain0.1:v0" 
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}__PosthocClipping0.1:v0" 
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:v0" 
     finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
 
     finetuned_models = {
@@ -84,13 +86,16 @@ def run(cfg: DictConfig) -> str:
         model.load_state_dict({k: v + 1/(scaling_coef)*task_vector[k] for k, v in model.state_dict().items()})
 
     # Make task vectors orthogonal among them
-    def gram_schmidt_orthogonalization(vectors):
-        orthogonal_vectors = []
-        for v in vectors:
-            for u in orthogonal_vectors:
-                v = v - torch.dot(v, u) / torch.dot(u, u) * u
-            orthogonal_vectors.append(v)
-        return torch.stack(orthogonal_vectors)
+    def tv_orthogonalization(vectors, method="gs"): # gs, svd, qr
+        if method == "gs":
+            orthogonal_vectors = []
+            for v in vectors:
+                for u in orthogonal_vectors:
+                    v = v - torch.dot(v, u) / torch.dot(u, u) * u
+                orthogonal_vectors.append(v)
+            return torch.stack(orthogonal_vectors)
+        else:
+            raise ValueError("Unsupported method.")
 
     with torch.no_grad():
         task_vectors = torch.stack(
@@ -98,7 +103,7 @@ def run(cfg: DictConfig) -> str:
         )
 
     
-    task_vectors = gram_schmidt_orthogonalization(task_vectors)
+    task_vectors = tv_orthogonalization(task_vectors, method='gs')
 
 
     task_vector_aggregator = instantiate(cfg.task_vectors.aggregator)

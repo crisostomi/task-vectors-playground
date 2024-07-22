@@ -103,12 +103,14 @@ class ImageClassifier(pl.LightningModule):
     def on_train_end(self):
         self.encoder.reset_weights_by_percentile(percentile=self.sparsity_percentile)
     """
-
+    
+    """
     def on_after_backward(self): # after backprop, we apply the binary mask element-wise to the gradient to prevent some weights from updating, maintaining TV sparsity
         if self.encoder.tv_mask is not None:
             for name, param in self.encoder.model.named_parameters():
                 if name in self.encoder.tv_mask and param.grad is not None:
                     param.grad *= self.encoder.tv_mask[name].to(param.device)
+    """
 
     def validation_step(self, batch: Any, batch_idx: int) -> Mapping[str, Any]:
         return self._step(batch=batch, split="val")
