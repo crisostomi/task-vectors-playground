@@ -40,8 +40,9 @@ task_vectors:
     - RESISC45
     - SVHN
 
-  scaling_coefficient: 10 #1
-
+  scaling_coefficient: 1
+  num_task_vectors: 8
+  
   aggregator:
     # _target_: tvp.task_vectors.aggregator.SphericalAggregator
     _target_: tvp.task_vectors.aggregator.SumAggregator

@@ -10,6 +10,8 @@ import torch
 from lightning.pytorch import Callback
 from omegaconf import DictConfig, ListConfig
 import copy
+import numpy as np
+
 
 from nn_core.callbacks import NNTemplateCore
 from nn_core.common import PROJECT_ROOT
@@ -59,8 +61,8 @@ def run(cfg: DictConfig) -> str:
 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}__PosthocClipping0.1:v0" 
-    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:latest"
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:latest" 
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
 
     finetuned_models = {
         dataset: load_model_from_artifact(artifact_path=finetuned_id_fn(dataset), run=logger.experiment)
@@ -81,10 +83,23 @@ def run(cfg: DictConfig) -> str:
         #model.load_state_dict({k: v + task_vector[k] for k, v in model.state_dict().items()})
         model.load_state_dict({k: v + 1/(scaling_coef)*task_vector[k] for k, v in model.state_dict().items()})
 
+    # Make task vectors orthogonal among them
+    def gram_schmidt_orthogonalization(vectors):
+        orthogonal_vectors = []
+        for v in vectors:
+            for u in orthogonal_vectors:
+                v = v - torch.dot(v, u) / torch.dot(u, u) * u
+            orthogonal_vectors.append(v)
+        return torch.stack(orthogonal_vectors)
+
     with torch.no_grad():
         task_vectors = torch.stack(
             [flatten(finetuned_models[dataset]) - zeroshot_vec for dataset in cfg.task_vectors.to_apply]
         )
+
+    
+    task_vectors = gram_schmidt_orthogonalization(task_vectors)
+
 
     task_vector_aggregator = instantiate(cfg.task_vectors.aggregator)
     multi_task_vector = task_vector_aggregator(task_vectors)
@@ -140,6 +155,44 @@ def run(cfg: DictConfig) -> str:
         results[dataset_name] = test_results
 
     print(results)
+
+
+
+
+
+
+
+
+def generate_orthogonal_directions_for_tv(state_dict, num_directions): # returns a dictionary where keys are the parameter names and the values are many orthogonal directions
+    orthogonal_directions = {}
+    for key, tensor in state_dict.items():
+        shape = tensor.shape
+        flat_dim = tensor.numel()
+        random_matrix = np.random.randn(flat_dim, num_directions)
+        q, _ = np.linalg.qr(random_matrix)
+        orthogonal_directions[key] = torch.tensor(q, dtype=torch.float32).view(*shape, num_directions)
+    return orthogonal_directions
+
+def project_onto_direction(tensor, direction):
+    flat_tensor = tensor.view(-1)
+    flat_direction = direction.view(-1)
+    projection = torch.matmul(flat_tensor, flat_direction) / torch.norm(flat_direction, dim=0)**2
+    projected_tensor = (flat_direction*projection).view(tensor.shape)
+    return projected_tensor
+
+def project_tv(tv, orthogonal_directions, task_id):
+    projected_state_dict = {}
+    for key, tensor in tv.items():
+        direction = orthogonal_directions[key][..., task_id].to("cuda")
+        projected_tensor = project_onto_direction(tensor, direction)
+        projected_state_dict[key] = projected_tensor
+    return projected_state_dict
+
+
+
+
+
+
 
 
 @hydra.main(config_path=str(PROJECT_ROOT / "conf"), config_name="task_vectors.yaml")
