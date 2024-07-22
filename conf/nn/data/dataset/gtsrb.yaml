@@ -1,4 +1,4 @@
 dataset_name: GTSRB
 ft_epochs: 11 
-posthoc_epochs: 3
+posthoc_epochs: 4
 num_classes: 43 

@@ -1,4 +1,4 @@
 dataset_name: MNIST
 ft_epochs: 5
-posthoc_epochs: 1
+posthoc_epochs: 2
 num_classes: 10

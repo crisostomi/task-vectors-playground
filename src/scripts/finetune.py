@@ -39,8 +39,8 @@ def run(cfg: DictConfig):
 
     logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
-    # zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1"
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
+    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1"
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
@@ -51,7 +51,7 @@ def run(cfg: DictConfig):
         upload_model_to_wandb(image_encoder, zeroshot_identifier, logger.experiment, cfg, metadata)
 
     else:
-        image_encoder = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
+        image_encoder = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:v0", run=logger.experiment) # replace v0 by latest
 
     if cfg.reset_classification_head:
         classification_head = get_classification_head(
@@ -102,8 +102,8 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        #max_epochs=cfg.nn.data.dataset.ft_epochs,
-        max_epochs = cfg.nn.data.dataset.posthoc_epochs, 
+        max_epochs=cfg.nn.data.dataset.ft_epochs,
+        #max_epochs = cfg.nn.data.dataset.posthoc_epochs, 
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
@@ -116,14 +116,13 @@ def run(cfg: DictConfig):
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}__PosthocClipping{str(model.sparsity_percentile)}"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_PosthocClipAndTrain{str(model.sparsity_percentile)}"
 
 
     model_class = get_class(image_encoder)
     
     #metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "sparseClipping"}
-    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "PosthocClipping"}
-
+    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "PosthocClipAndTrain"}
     upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
 
     if logger is not None:

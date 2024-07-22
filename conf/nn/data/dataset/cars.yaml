@@ -1,3 +1,4 @@
 dataset_name: Cars
 ft_epochs: 35
+posthoc_epochs: 10
 num_classes: 196

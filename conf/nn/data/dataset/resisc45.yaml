@@ -1,4 +1,4 @@
 dataset_name: RESISC45
 ft_epochs: 15
-posthoc_epochs: 3
+posthoc_epochs: 5
 num_classes: 45

@@ -1,5 +1,5 @@
 # https://www.robots.ox.ac.uk/~vgg/data/dtd/
 dataset_name: DTD
 ft_epochs: 76
-posthoc_epochs: 10
+posthoc_epochs: 20
 num_classes: 47

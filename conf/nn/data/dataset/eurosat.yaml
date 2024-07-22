@@ -1,5 +1,5 @@
 # https://github.com/phelber/EuroSAT
 dataset_name: EuroSAT 
 ft_epochs: 12
-posthoc_epochs: 3
+posthoc_epochs: 4
 num_classes: 10
