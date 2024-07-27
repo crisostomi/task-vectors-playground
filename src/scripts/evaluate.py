@@ -1,12 +1,15 @@
 ## Imports
 import logging
 import os
-from typing import List, Optional
-
+from typing import Dict, List, Union, Optional
+import wandb
 import hydra
 import omegaconf
 import pytorch_lightning as pl
+from pytorch_lightning import Callback, LightningModule
+from tqdm import tqdm
 import torch
+import torch.nn as nn
 from lightning.pytorch import Callback
 from omegaconf import DictConfig, ListConfig
 import copy
@@ -57,14 +60,15 @@ def run(cfg: DictConfig) -> str:
     )
     logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
+    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_1stOrderUnifiedModel_0" 
 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_PosthocClipAndTrain0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}__PosthocClipping0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:v0" 
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2ndOrder:v0"
 
     finetuned_models = {
         dataset: load_model_from_artifact(artifact_path=finetuned_id_fn(dataset), run=logger.experiment)
@@ -86,12 +90,12 @@ def run(cfg: DictConfig) -> str:
         model.load_state_dict({k: v + 1/(scaling_coef)*task_vector[k] for k, v in model.state_dict().items()})
 
     # Make task vectors orthogonal among them
-    def tv_orthogonalization(vectors, method="gs"): # gs, svd, qr
+    def tv_orthogonalization(vectors, method="gs"): # gs: gram schmidt
         if method == "gs":
             orthogonal_vectors = []
             for v in vectors:
                 for u in orthogonal_vectors:
-                    v = v - torch.dot(v, u) / torch.dot(u, u) * u
+                    v = v - (torch.dot(v, u) / torch.dot(u, u)) * u
                 orthogonal_vectors.append(v)
             return torch.stack(orthogonal_vectors)
         else:
@@ -101,10 +105,8 @@ def run(cfg: DictConfig) -> str:
         task_vectors = torch.stack(
             [flatten(finetuned_models[dataset]) - zeroshot_vec for dataset in cfg.task_vectors.to_apply]
         )
-
     
     task_vectors = tv_orthogonalization(task_vectors, method='gs')
-
 
     task_vector_aggregator = instantiate(cfg.task_vectors.aggregator)
     multi_task_vector = task_vector_aggregator(task_vectors)
@@ -114,6 +116,14 @@ def run(cfg: DictConfig) -> str:
     task_equipped_model = copy.deepcopy(zeroshot_model)
     apply_task_vector(task_equipped_model, delta_model.state_dict(), scaling_coef=cfg.task_vectors.scaling_coefficient)
 
+
+    # Save the unified model as artifact
+    artifact_name = f"{cfg.nn.module.model.model_name}_1stOrderUnifiedModel_{cfg.seed_index}"
+    metadata = {"model_name": "ViT-B-16", "model_class": "tvp.modules.encoder.ImageEncoder"}
+    upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
+
+
+
     seed_index_everything(cfg)
 
     results = {}
@@ -122,6 +132,7 @@ def run(cfg: DictConfig) -> str:
 
         classification_head_identifier = f"{cfg.nn.module.model.model_name}_{dataset_name}_head"
         classification_head = load_model_from_artifact(
+            #artifact_path=f"{classification_head_identifier}:v0", run=logger.experiment
             artifact_path=f"{classification_head_identifier}:latest", run=logger.experiment
         )
 
@@ -194,6 +205,37 @@ def project_tv(tv, orthogonal_directions, task_id):
     return projected_state_dict
 
 
+def upload_model_to_wandb(
+    model: Union[LightningModule, nn.Module], artifact_name, run, cfg: DictConfig, metadata: Dict
+):
+    model = model.cpu()
+
+    pylogger.info(f"Uploading artifact {artifact_name}")
+
+    model_artifact = wandb.Artifact(name=artifact_name, type="checkpoint", metadata=metadata)
+
+    temp_path = "temp_checkpoint.ckpt"
+
+    if isinstance(model, LightningModule):
+        trainer = pl.Trainer(
+            plugins=[NNCheckpointIO(jailing_dir="./tmp")],
+        )
+
+        trainer.strategy.connect(model)
+        trainer.save_checkpoint(temp_path)
+
+        model_artifact.add_file(temp_path + ".zip", name="trained.ckpt.zip")
+        path_to_remove = temp_path + ".zip"
+
+    else:
+        torch.save(model.state_dict(), temp_path)
+
+        model_artifact.add_file(temp_path, name="trained.ckpt")
+        path_to_remove = temp_path
+
+    run.log_artifact(model_artifact)
+
+    os.remove(path_to_remove)
 
 
 

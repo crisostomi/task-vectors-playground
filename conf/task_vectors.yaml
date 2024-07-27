@@ -31,7 +31,7 @@ eval_datasets:
 
 task_vectors:
   to_apply:
-    - Cars
+  # - Cars
     - CIFAR100
     - DTD
     - EuroSAT

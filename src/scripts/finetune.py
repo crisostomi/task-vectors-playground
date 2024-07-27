@@ -39,8 +39,9 @@ def run(cfg: DictConfig):
 
     logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
-    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1"
+    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
+    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1" # for additional fine-tuning
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_1stOrderUnifiedModel_0" 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
@@ -116,13 +117,13 @@ def run(cfg: DictConfig):
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_PosthocClipAndTrain{str(model.sparsity_percentile)}"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
 
 
     model_class = get_class(image_encoder)
     
     #metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "sparseClipping"}
-    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "PosthocClipAndTrain"}
+    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class}
     upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
 
     if logger is not None:
