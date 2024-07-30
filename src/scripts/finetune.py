@@ -41,7 +41,7 @@ def run(cfg: DictConfig):
 
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1" # for additional fine-tuning
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_1stOrderUnifiedModel_0" 
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_firstOrderUnifiedModel_0" 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
