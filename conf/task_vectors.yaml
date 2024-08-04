@@ -39,6 +39,7 @@ task_vectors:
     - MNIST
     - RESISC45
     - SVHN
+    
   orthogonalize: false
 
   scaling_coefficient: 1
