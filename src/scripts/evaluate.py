@@ -13,6 +13,7 @@ import torch.nn as nn
 from lightning.pytorch import Callback
 from omegaconf import DictConfig, ListConfig
 import copy
+import torch.nn.functional as F
 import numpy as np
 
 
@@ -61,15 +62,16 @@ def run(cfg: DictConfig) -> str:
     logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_firstOrderUnifiedModel_0" 
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_HalfEps1stOrderUnifiedModel_0" 
 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_PosthocClipAndTrain0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}__PosthocClipping0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:v0" 
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2ndOrder:v0"
-    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{datase}_{cfg.seed_index}:v0"
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2ndOrder:v0"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_HalfEps2ndOrder:v0"
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
 
     finetuned_models = {
         dataset: load_model_from_artifact(artifact_path=finetuned_id_fn(dataset), run=logger.experiment)
@@ -110,6 +112,8 @@ def run(cfg: DictConfig) -> str:
     if cfg.task_vectors.orthogonalize:
         task_vectors = tv_orthogonalization(task_vectors, method='gs')
 
+    print_pairwise_cos_sim(task_vectors)
+
     task_vector_aggregator = instantiate(cfg.task_vectors.aggregator)
     multi_task_vector = task_vector_aggregator(task_vectors)
 
@@ -121,7 +125,7 @@ def run(cfg: DictConfig) -> str:
 
     # Save the unified model as artifact
     #artifact_name = f"{cfg.nn.module.model.model_name}_2stOrderUnifiedModel_{cfg.seed_index}"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_1stOrderUnifiedModel_{cfg.seed_index}"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_HalfEps2ndOrderUnifiedModel_{cfg.seed_index}"
     #metadata = {"model_name": "ViT-B-16", "model_class": "tvp.modules.encoder.ImageEncoder"}
     #upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 
@@ -178,7 +182,13 @@ def run(cfg: DictConfig) -> str:
 
 
 
-
+def print_pairwise_cos_sim(task_vectors): # input shape: [num_vectors, vector_size]:
+    norm_tensor = F.normalize(task_vectors, p=2, dim=1)
+    cosine_similarity_matrix = torch.mm(norm_tensor, norm_tensor.T)
+    cosine_similarity_matrix_np = cosine_similarity_matrix.detach().numpy()
+    print("\nPairwise Cosine Similarity Matrix:")
+    print(cosine_similarity_matrix_np)
+    print("\n")
 
 
 def generate_orthogonal_directions_for_tv(state_dict, num_directions): # returns a dictionary where keys are the parameter names and the values are many orthogonal directions

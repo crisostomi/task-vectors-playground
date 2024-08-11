@@ -39,9 +39,9 @@ def run(cfg: DictConfig):
 
     logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
+    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1" # for additional fine-tuning
-    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_firstOrderUnifiedModel_0" 
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_HalfEps1stOrderUnifiedModel_0" 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
@@ -103,7 +103,7 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        max_epochs=cfg.nn.data.dataset.ft_epochs,
+        max_epochs=int(cfg.nn.data.dataset.ft_epochs/2),########################### divided by 2 ####################
         #max_epochs = cfg.nn.data.dataset.posthoc_epochs, 
         logger=logger,
         callbacks=callbacks,
@@ -116,7 +116,7 @@ def run(cfg: DictConfig):
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_Dense"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_HalfEps2ndOrder"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
 
