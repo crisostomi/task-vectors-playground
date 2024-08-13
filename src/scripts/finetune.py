@@ -41,7 +41,7 @@ def run(cfg: DictConfig):
 
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1" # for additional fine-tuning
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_HalfEps1stOrderUnifiedModel_0" 
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_HalfEps2ndOrderUnifiedModel_0" 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
@@ -116,7 +116,7 @@ def run(cfg: DictConfig):
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_HalfEps2ndOrder"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_HalfEps3rdOrder"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
 
