@@ -43,8 +43,8 @@ torch.set_float32_matmul_precision("high")
 
 
 def run(cfg: DictConfig) -> str:
-    epoch_divisor = cfg.nn.finetune.epoch_divisor
-    order = cfg.nn.finetune.order
+    epoch_divisor = cfg.epoch_divisor
+    order = cfg.order
 
     num_to_th = {
     1: "st",
@@ -77,7 +77,7 @@ def run(cfg: DictConfig) -> str:
     if order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
     else:
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{str(epoch_divisor)}Eps{str(order-1)}{num_to_th[order-1]}OrderUnifiedModel_0" 
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_0" 
 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
@@ -85,7 +85,7 @@ def run(cfg: DictConfig) -> str:
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}__PosthocClipping0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2ndOrder:v0"
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{str(epoch_divisor)}Eps{str(order)}{num_to_th[order]}Order:v0"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:v0"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
 
     finetuned_models = {
@@ -140,7 +140,7 @@ def run(cfg: DictConfig) -> str:
 
     # Save the unified model as artifact
     #artifact_name = f"{cfg.nn.module.model.model_name}_2stOrderUnifiedModel_{cfg.seed_index}"
-    artifact_name = f"{cfg.nn.module.model.model_name}_HalfEps5thOrderUnifiedModel_{cfg.seed_index}"
+    artifact_name = f"{cfg.nn.module.model.model_name}_One{order}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
     metadata = {"model_name": "ViT-B-16", "model_class": "tvp.modules.encoder.ImageEncoder"}
     upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 

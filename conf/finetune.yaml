@@ -7,7 +7,7 @@ core:
     - finetune
 
 defaults:
-  - hydra: default
+  - hydra: default  
   - nn: default
   - train: default
   - _self_ # as last argument to allow the override of parameters via this main config
@@ -30,4 +30,4 @@ misc:
   cache_dir: null
 
 epoch_divisor: 2 # the actual number of epochs is the original number divided by this coefficient
-order: 5
+order: 6
