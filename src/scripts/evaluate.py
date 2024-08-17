@@ -52,7 +52,9 @@ def run(cfg: DictConfig) -> str:
     3: "rd",
     4: "th",
     5: "th",
-    6: "th"
+    6: "th",
+    7: "th",
+    8: "th"
 }
 
     """Generic train loop.
