@@ -62,7 +62,7 @@ def run(cfg: DictConfig) -> str:
     logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_HalfEps1stOrderUnifiedModel_0" 
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_HalfEps4thOrderUnifiedModel_0" 
 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
@@ -70,7 +70,7 @@ def run(cfg: DictConfig) -> str:
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}__PosthocClipping0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2ndOrder:v0"
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_HalfEps2ndOrder:v0"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_HalfEps5thOrder:v0"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
 
     finetuned_models = {
@@ -125,9 +125,9 @@ def run(cfg: DictConfig) -> str:
 
     # Save the unified model as artifact
     #artifact_name = f"{cfg.nn.module.model.model_name}_2stOrderUnifiedModel_{cfg.seed_index}"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_HalfEps2ndOrderUnifiedModel_{cfg.seed_index}"
-    #metadata = {"model_name": "ViT-B-16", "model_class": "tvp.modules.encoder.ImageEncoder"}
-    #upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
+    artifact_name = f"{cfg.nn.module.model.model_name}_HalfEps5thOrderUnifiedModel_{cfg.seed_index}"
+    metadata = {"model_name": "ViT-B-16", "model_class": "tvp.modules.encoder.ImageEncoder"}
+    upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 
 
     seed_index_everything(cfg)
