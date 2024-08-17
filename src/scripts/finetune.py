@@ -29,6 +29,14 @@ from tvp.utils.utils import LabelSmoothing, build_callbacks
 pylogger = logging.getLogger(__name__)
 torch.set_float32_matmul_precision("high")
 
+num_to_th = {
+    1: "st",
+    2: "nd",
+    3: "rd",
+    4: "th",
+    5: "th",
+    6: "th"
+}
 
 def run(cfg: DictConfig):
     seed_index_everything(cfg)
@@ -41,7 +49,10 @@ def run(cfg: DictConfig):
 
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
     #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1" # for additional fine-tuning
-    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_HalfEps4thOrderUnifiedModel_0" 
+    zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{str(cfg.epoch_divisor)}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
+    if cfg.order == 1:
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" 
+        
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
     if cfg.reset_pretrained_model:
@@ -116,7 +127,7 @@ def run(cfg: DictConfig):
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_HalfEps5thOrder"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{str(cfg.epoch_divisor)}Eps{cfg.order}{num_to_th[cfg.order]}Order"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
 
