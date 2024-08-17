@@ -28,3 +28,5 @@ misc:
   pretrained_checkpoint: ${misc.ckpt_path}/zeroshot.pt
   openclip_cachedir: "${oc.env:PROJECT_ROOT}/checkpoints/openclip_cache"
   cache_dir: null
+
+epoch_divisor: 2 # the actual number of epochs is the original number divided by this coefficient

@@ -31,7 +31,6 @@ torch.set_float32_matmul_precision("high")
 
 
 def run(cfg: DictConfig):
-    epoch_divisor = 2 # the actual number of epochs is the original number divided by this coefficient
     seed_index_everything(cfg)
 
     template_core: NNTemplateCore = NNTemplateCore(
@@ -104,7 +103,7 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        max_epochs=int(cfg.nn.data.dataset.ft_epochs/epoch_divisor),########################### divided by 2 ####################
+        max_epochs=int(cfg.nn.data.dataset.ft_epochs/cfg.epoch_divisor),
         #max_epochs = cfg.nn.data.dataset.posthoc_epochs, 
         logger=logger,
         callbacks=callbacks,
