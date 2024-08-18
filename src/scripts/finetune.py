@@ -183,6 +183,5 @@ def upload_model_to_wandb(
 def main(cfg: omegaconf.DictConfig):
     run(cfg)
 
-
 if __name__ == "__main__":
     main()

@@ -58,4 +58,4 @@ misc:
   cache_dir: null
 
 epoch_divisor: 4 # the actual number of epochs is the original number divided by this coefficient, here we need to indicate this for evaluation
-order: 4
+order: 3
