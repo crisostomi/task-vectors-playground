@@ -57,5 +57,5 @@ misc:
   openclip_cachedir: "${oc.env:PROJECT_ROOT}/checkpoints/openclip_cache"
   cache_dir: null
 
-epoch_divisor: 2 # the actual number of epochs is the original number divided by this coefficient, here we need to indicate this for evaluation
-order: 5
+epoch_divisor: 4 # the actual number of epochs is the original number divided by this coefficient, here we need to indicate this for evaluation
+order: 4
