@@ -1,4 +1,4 @@
-# This script iteratively does the following in an automated manner:
+# This script runs the framework for 1 order, it iteratively does the following in an automated manner:
 # 1) update the dataset name in the default.yaml file (previously done manually)
 # 2) run finetuning.py
 
@@ -22,4 +22,4 @@ for dataset in datasets:
 
     print(f"\n\n\nExperiment for dataset {dataset} completed.\n\n\n")
 
-# subprocess.run(["python", "src/scripts/evaluate.py"], check=True) # run this to evaluate the unified multitask model after the current oder of TVA
+subprocess.run(["python", "src/scripts/evaluate.py"], check=True) # run this to evaluate the unified multitask model after the current oder of TVA

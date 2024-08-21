@@ -37,7 +37,9 @@ num_to_th = {
     5: "th",
     6: "th",
     7: "th",
-    8: "th"
+    8: "th",
+    9: "th",
+    10:"th"
 }
 
 def run(cfg: DictConfig):
@@ -130,6 +132,7 @@ def run(cfg: DictConfig):
 
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
+
 
     artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"

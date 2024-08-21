@@ -54,7 +54,9 @@ def run(cfg: DictConfig) -> str:
     5: "th",
     6: "th",
     7: "th",
-    8: "th"
+    8: "th",
+    9: "th",
+    10:"th"
 }
 
     """Generic train loop.
@@ -144,6 +146,7 @@ def run(cfg: DictConfig) -> str:
     # Save the unified model as artifact
     #artifact_name = f"{cfg.nn.module.model.model_name}_2stOrderUnifiedModel_{cfg.seed_index}"
     artifact_name = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_HalfEpsSomeDatasets2ndOrderUnifiedModel_{cfg.seed_index}" #################
     metadata = {"model_name": "ViT-B-16", "model_class": "tvp.modules.encoder.ImageEncoder"}
     upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 

@@ -1,33 +1,26 @@
+conventions:
+  x_key: x
+  y_key: y
 core:
+  entity: gladia
   project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
-  entity: gladia
-  version: 0.0.1
   tags:
-    - finetune
-
+  - finetune
+  version: 0.0.1
 defaults:
-  - hydra: default  
-  - nn: default
-  - train: default
-  - _self_ # as last argument to allow the override of parameters via this main config
-
-seed_index: 0
-
-reset_pretrained_model: false
-reset_classification_head: true
-
-conventions:
-  x_key: 'x'
-  y_key: 'y'
-
-
+- hydra: default
+- nn: default
+- train: default
+- _self_
+epoch_divisor: 2
 misc:
-  save_pretrained: false
-  ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}
-  pretrained_checkpoint: ${misc.ckpt_path}/zeroshot.pt
-  openclip_cachedir: "${oc.env:PROJECT_ROOT}/checkpoints/openclip_cache"
   cache_dir: null
-
-epoch_divisor: 4 # the actual number of epochs is the original number divided by this coefficient
-order: 3
+  ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}
+  openclip_cachedir: ${oc.env:PROJECT_ROOT}/checkpoints/openclip_cache
+  pretrained_checkpoint: ${misc.ckpt_path}/zeroshot.pt
+  save_pretrained: false
+order: 10
+reset_classification_head: true
+reset_pretrained_model: false
+seed_index: 0
