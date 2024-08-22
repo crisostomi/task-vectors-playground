@@ -69,7 +69,7 @@ def run(cfg: DictConfig):
         upload_model_to_wandb(image_encoder, zeroshot_identifier, logger.experiment, cfg, metadata)
 
     else:
-        image_encoder = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:v0", run=logger.experiment) # replace v0 by latest
+        image_encoder = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     if cfg.reset_classification_head:
         classification_head = get_classification_head(
@@ -120,7 +120,8 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        max_epochs=int(cfg.nn.data.dataset.ft_epochs/cfg.epoch_divisor),
+        # max_epochs=int(cfg.nn.data.dataset.ft_epochs/cfg.epoch_divisor),
+        max_epochs=0,
         #max_epochs = cfg.nn.data.dataset.posthoc_epochs, 
         logger=logger,
         callbacks=callbacks,
