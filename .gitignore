@@ -228,3 +228,5 @@ checkpoints/
 artifacts/
 outputs/
 /data
+
+artifacts_downloaded_from_wandb/
