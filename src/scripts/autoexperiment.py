@@ -1,4 +1,5 @@
 # This scripts runs an entirement, it goes from order 1 all the way to order n.
+from rich import print
 
 import yaml
 import subprocess
@@ -32,7 +33,10 @@ for order in range(1, desired_orders+1):
     
 
     datasets = ["cifar100", "dtd", "eurosat", "gtsrb", "mnist", "resisc45", "svhn"]
-    for dataset in datasets: # modify the dataset hyperparameter in config
+    for dataset_id, dataset in enumerate(datasets): # modify the dataset hyperparameter in config
+
+        print(f"[bold]\n\n\n{dataset} ({dataset_id + 1}/{len(datasets)}), order ({order}/{desired_orders})\n\n\n")
+
         with open(yaml_file, "r") as file:
             config = yaml.safe_load(file)
             config['defaults'][0]['dataset'] = dataset
@@ -42,8 +46,6 @@ for order in range(1, desired_orders+1):
             yaml.dump(config, file)
 
         subprocess.run(["python", "src/scripts/finetune.py"], check=True)
-
-        print(f"\n\n\nExperiment for dataset {dataset} completed.\n\n\n")
 
     subprocess.run(["python", "src/scripts/evaluate.py"], check=True)
     
