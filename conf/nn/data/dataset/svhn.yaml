@@ -1,4 +1,5 @@
 dataset_name: SVHN
 ft_epochs: 4
 posthoc_epochs: 2
+finegrained_epochs: 1
 num_classes: 10

@@ -2,4 +2,5 @@
 dataset_name: DTD
 ft_epochs: 76
 posthoc_epochs: 20
+finegrained_epochs: 13
 num_classes: 47
