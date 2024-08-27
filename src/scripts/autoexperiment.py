@@ -1,4 +1,4 @@
-# This scripts runs an entirement, it goes from order 1 all the way to order n.
+# This scripts runs an entire experiment, it goes from order 1 all the way to order "desired_orders".
 from rich import print
 
 import yaml
