@@ -37,6 +37,10 @@ import hydra
 from hydra import initialize, compose
 from typing import Dict, List
 
+from my_ties import ties_merging
+from my_breadcrumbs import model_breadcrumbs
+
+
 pylogger = logging.getLogger(__name__)
 
 torch.set_float32_matmul_precision("high")
@@ -130,6 +134,10 @@ def run(cfg: DictConfig) -> str:
             [flatten(finetuned_models[dataset]) - zeroshot_vec for dataset in cfg.task_vectors.to_apply]
         )
     
+    if cfg.task_vectors.merging_method == "ties":
+        task_vectors = ties_merging(task_vectors, cfg.task_vectors.ties_topk)
+    elif cfg.task_vectors.merging_method == "breadcrumbs":
+        task_vectors = model_breadcrumbs(task_vectors,beta=cfg.task_vectors.breadcrumbs_beta, gamma=cfg.task_vectors.breadcrumbs_gamma)
     if cfg.task_vectors.orthogonalize:
         task_vectors = tv_orthogonalization(task_vectors, method='gs')
 
