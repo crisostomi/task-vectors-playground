@@ -46,7 +46,7 @@ task_vectors:
   - RESISC45
   - SVHN
 
-  merging_method: ties # normal, ties, breadcrumbs
+  merging_method: normal # normal, ties, breadcrumbs
   ties_topk: 0.2 # percentage of top-magnitude weights preserved
   ties_lambda: 1 # the multiplicative coefficient when adding TIES task vectors
   breadcrumbs_beta: 0.85
