@@ -1,34 +1,46 @@
 import numpy as np
 
-def model_breadcrumbs(task_vectors,beta=0.85, gamma=0.993):
+import torch
+
+def model_breadcrumbs(task_vectors, beta=0.85, gamma=0.993):
     pruned_task_vectors = []
-    
+
     for task_vector in task_vectors:
-        # Step 1: Rank TV weights by magnitude
-        sorted_indices = np.argsort(np.abs(task_vector))
-        num_params = len(task_vector)
+        num_params = task_vector.numel()
         
-        # Step 2: Prune the left β% and right γ% of the ranked weights
-        beta_cutoff = int(beta * num_params)
-        gamma_cutoff = int((1 - gamma) * num_params)
+        # Step 1: Calculate thresholds directly
+        abs_tensor = task_vector.abs()
+        beta_value = int(beta * num_params)
+        gamma_value = int((1 - gamma) * num_params)
         
-        pruned_vector = np.zeros_like(task_vector)
-        pruned_vector[sorted_indices[beta_cutoff:gamma_cutoff]] = task_vector[sorted_indices[beta_cutoff:gamma_cutoff]]
+        # Efficient computation of thresholds using partial sorting
+        if beta_value > 0:
+            beta_threshold = torch.topk(abs_tensor, beta_value, sorted=False).values.min()
+        else:
+            beta_threshold = abs_tensor.min()
         
-        pruned_task_vectors.append(pruned_vector)
+        if gamma_value > 0:
+            gamma_threshold = torch.topk(abs_tensor, gamma_value, sorted=False).values.min()
+        else:
+            gamma_threshold = abs_tensor.max()
+        
+        # Step 2: Prune using thresholds
+        pruned = torch.where((abs_tensor >= beta_threshold) & (abs_tensor <= gamma_threshold), task_vector, torch.tensor(0.0, device=device))
+        
+        pruned_task_vectors.append(pruned)
     
-    pruned_task_vectors = np.array(pruned_task_vectors)
+    # Convert the list of tensors to a single tensor
+    pruned_task_vectors = torch.stack(pruned_task_vectors, dim=0)
     return pruned_task_vectors
 
-
-"""task_vectors = np.array([
-    [0.2, 0.1, -0.4, 0.3],
-    [-0.1, 0.4, -0.2, 0.1],
-    [0.3, -0.3, 0.2, -0.4]
+"""# Example usage:
+task_vectors = np.array([
+    [-0.6157, -0.4206, 0.2174, -0.5956, -0.3906, -2.7919, 0.7029, -1.2054, -0.0169, -0.4693, -2.0810, -1.2877, -0.4426, -0.4871, 0.5076, 0.5087],
+    [-1.3138, 1.1421, -0.1657, 0.8621, -1.7934, 0.5377, 0.4645, 0.0699, 0.4182, -1.0612, 1.0529, 1.2909, -0.3178, -1.3791, 0.0143, -0.0656],
+    [0.7429, 1.2865, 0.5754, 1.1790, 1.2531, 0.1931, 0.1933, -1.5641, 1.5267, -0.5896, 0.7202, 1.5949, -0.9238, -0.5806, -0.3140, 0.3183]
 ])
-beta = 0.1  # Prune the bottom 10% of weights
-gamma = 0.1  # Prune the top 10% of weights
-strength_coeff = 0.5  # Apply a strength coefficient
 
-pruned_vectors = model_breadcrumbs(task_vectors, beta, gamma, strength_coeff)
+pruned_vectors = model_breadcrumbs(task_vectors)
 print("Pruned Task Vectors:\n", pruned_vectors)"""
+
+
