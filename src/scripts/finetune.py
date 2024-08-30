@@ -121,8 +121,7 @@ def run(cfg: DictConfig):
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
         #max_epochs=int(cfg.nn.data.dataset.ft_epochs/cfg.epoch_divisor),
-        #max_epochs = cfg.nn.data.dataset.finegrained_epochs, 
-        max_epochs = 10, 
+        max_epochs = 1, 
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
@@ -134,8 +133,8 @@ def run(cfg: DictConfig):
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_10Eps{cfg.order}{num_to_th[cfg.order]}Order"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_10Eps1Order"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
 

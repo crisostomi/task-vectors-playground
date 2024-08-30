@@ -37,8 +37,9 @@ import hydra
 from hydra import initialize, compose
 from typing import Dict, List
 
-from my_ties import ties_merging
-from my_breadcrumbs import model_breadcrumbs
+from competitors.my_ties import ties_merging
+from competitors.my_breadcrumbs import model_breadcrumbs
+from competitors.their_ties import *
 
 
 pylogger = logging.getLogger(__name__)
@@ -97,6 +98,8 @@ def run(cfg: DictConfig) -> str:
     finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:latest"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One4Eps1stOrder:v0"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_10Eps1Order:latest"
+
 
     finetuned_models = {
         dataset: load_model_from_artifact(artifact_path=finetuned_id_fn(dataset), run=logger.experiment)
@@ -135,16 +138,24 @@ def run(cfg: DictConfig) -> str:
         )
     
     if cfg.task_vectors.merging_method == "ties":
-        task_vectors = ties_merging(task_vectors, cfg.task_vectors.ties_topk)
+        print("\nRunning TIES...\n")
+        #task_vectors = ties_merging(task_vectors, cfg.task_vectors.ties_topk)
+        multi_task_vector = their_ties_merging(reset_type="topk",
+                                          flat_task_checks=task_vectors, 
+                                          reset_thresh=cfg.task_vectors.ties_topk,
+                                          resolve_method="none",
+                                          merge_func="mean")
     elif cfg.task_vectors.merging_method == "breadcrumbs":
+        print("\nRunning Model Breadcrumbs...\n")
         task_vectors = model_breadcrumbs(task_vectors,beta=cfg.task_vectors.breadcrumbs_beta, gamma=cfg.task_vectors.breadcrumbs_gamma)
     if cfg.task_vectors.orthogonalize:
         task_vectors = tv_orthogonalization(task_vectors, method='gs')
 
     print_pairwise_cos_sim(task_vectors)
 
-    task_vector_aggregator = instantiate(cfg.task_vectors.aggregator)
-    multi_task_vector = task_vector_aggregator(task_vectors)
+    if cfg.task_vectors.merging_method != "ties":
+        task_vector_aggregator = instantiate(cfg.task_vectors.aggregator)
+        multi_task_vector = task_vector_aggregator(task_vectors)
 
     delta_model = copy.deepcopy(zeroshot_model)
     vector_to_parameters(multi_task_vector, delta_model.parameters())
@@ -156,6 +167,8 @@ def run(cfg: DictConfig) -> str:
     #artifact_name = f"{cfg.nn.module.model.model_name}_2stOrderUnifiedModel_{cfg.seed_index}"
     artifact_name = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_HalfEpsSomeDatasets2ndOrderUnifiedModel_{cfg.seed_index}" #################
+    #artifact_name = f"{cfg.nn.module.model.model_name}_10Eps_UnifiedModel_{cfg.seed_index}"
+    artifact_name = f"{cfg.nn.module.model.model_name}_TIES10EpsUnifiedModel_{cfg.seed_index}"
     metadata = {"model_name": f"{cfg.nn.module.model.model_name}", "model_class": "tvp.modules.encoder.ImageEncoder"}
     upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 

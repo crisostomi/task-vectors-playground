@@ -13,14 +13,14 @@ defaults:
 - nn: default
 - train: default
 - _self_
-epoch_divisor: 2
+epoch_divisor: None
 misc:
   cache_dir: null
   ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}
   openclip_cachedir: ${oc.env:PROJECT_ROOT}/checkpoints/openclip_cache
   pretrained_checkpoint: ${misc.ckpt_path}/zeroshot.pt
   save_pretrained: false
-order: 10
+order: 1
 reset_classification_head: true
 reset_pretrained_model: false
 seed_index: 0
