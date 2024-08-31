@@ -5,7 +5,7 @@ import yaml
 import subprocess
 
 epoch_divisor = "None"
-desired_orders = 10
+desired_orders = 1
 
 yaml_file = "conf/nn/data/default.yaml"
 ft_conf_file = "conf/finetune.yaml"

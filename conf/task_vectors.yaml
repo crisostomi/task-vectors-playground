@@ -36,12 +36,12 @@ task_vectors:
     mean: true
   breadcrumbs_beta: 0.85
   breadcrumbs_gamma: 0.993
-  merging_method: breadcrumbs
+  merging_method: normal
   num_task_vectors: 8
   orthogonalize: false
   scaling_coefficient: 1
   ties_lambda: 1
-  ties_topk: 0.2
+  ties_topk: 0.15
   to_apply:
   - CIFAR100
   - DTD
