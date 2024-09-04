@@ -87,18 +87,19 @@ def run(cfg: DictConfig) -> str:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
     else:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_0" 
-
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_10Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_{cfg.seed_index}"
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_PosthocClipAndTrain0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}__PosthocClipping0.1:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_sparseClipping0.01:v0" 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2ndOrder:v0"
-    # finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:v0"
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:v0"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:latest"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One4Eps1stOrder:v0"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2Eps1stOrder:latest"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_10Eps1stOrder:latest"
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2Eps{cfg.order}{num_to_th[cfg.order]}Order:latest"
 
 
     finetuned_models = {
@@ -148,6 +149,7 @@ def run(cfg: DictConfig) -> str:
     elif cfg.task_vectors.merging_method == "breadcrumbs":
         print("\nRunning Model Breadcrumbs...\n")
         task_vectors = model_breadcrumbs(task_vectors,beta=cfg.task_vectors.breadcrumbs_beta, gamma=cfg.task_vectors.breadcrumbs_gamma)
+    else: print("\nRunning vanilla merging...\n")
     if cfg.task_vectors.orthogonalize:
         task_vectors = tv_orthogonalization(task_vectors, method='gs')
 
@@ -169,8 +171,10 @@ def run(cfg: DictConfig) -> str:
     #artifact_name = f"{cfg.nn.module.model.model_name}_HalfEpsSomeDatasets2ndOrderUnifiedModel_{cfg.seed_index}" #################
     #artifact_name = f"{cfg.nn.module.model.model_name}_10Eps_UnifiedModel_{cfg.seed_index}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_TIEScrumbs10EpsUnifiedModel_{cfg.seed_index}"
+    #Eps{cfg.order}{num_to_th[cfg.order]}
+    artifact_name = f"{cfg.nn.module.model.model_name}_Breadcrumbs10Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
     metadata = {"model_name": f"{cfg.nn.module.model.model_name}", "model_class": "tvp.modules.encoder.ImageEncoder"}
-    #upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
+    upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 
 
     seed_index_everything(cfg)
