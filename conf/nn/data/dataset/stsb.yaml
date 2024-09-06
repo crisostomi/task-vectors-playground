@@ -1,0 +1,4 @@
+dataset_name: STSB
+num_classes: 2
+
+# NOTE regression task, NOT a classification one!

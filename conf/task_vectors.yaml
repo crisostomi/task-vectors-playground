@@ -16,7 +16,7 @@ defaults:
 - _self_
 epoch_divisor: None
 eval_datasets:
-- CoLA
+- RTE
 eval_on_train: false
 misc:
   cache_dir: null
@@ -39,3 +39,9 @@ task_vectors:
   ties_topk: 0.15
   to_apply:
   - CoLA
+  - SST2
+  - MRPC
+  - QQP
+  - MNLI
+  - QNLI
+  - RTE

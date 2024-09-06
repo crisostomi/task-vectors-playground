@@ -23,6 +23,13 @@ from transformers import AutoTokenizer
 from tvp.data.datasets.glue_data_loader import GLUEDataLoader
 
 from tvp.data.datasets.cola import CoLA
+from tvp.data.datasets.sst2 import SST2
+from tvp.data.datasets.mrpc import MRPC
+# from tvp.data.datasets.stsb import STSB
+from tvp.data.datasets.qqp import QQP
+from tvp.data.datasets.mnli import MNLI
+from tvp.data.datasets.qnli import QNLI
+from tvp.data.datasets.rte import RTE
 
 registry = {name: obj for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass)}
 
