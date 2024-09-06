@@ -19,6 +19,11 @@ from tvp.data.datasets.stl10 import STL10
 from tvp.data.datasets.sun397 import SUN397
 from tvp.data.datasets.svhn import SVHN
 
+from transformers import AutoTokenizer
+from tvp.data.datasets.glue_data_loader import GLUEDataLoader
+
+from tvp.data.datasets.cola import CoLA
+
 registry = {name: obj for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass)}
 
 
@@ -93,4 +98,31 @@ def get_dataset(
         ), f"Unsupported dataset: {dataset_name}. Supported datasets: {list(registry.keys())}"
         dataset_class = registry[dataset_name]
     dataset = dataset_class(preprocess_fn, location=location, batch_size=batch_size, num_workers=num_workers)
+    return dataset
+
+
+def get_text_dataset(
+    dataset_name: str,
+    tokenizer_name: str,
+    train_split_ratio_for_val: float = 0.1,
+    max_seq_length: int = 128,
+    batch_size: int = 128,
+    num_workers: int = 16,
+):
+
+    dataset_class = registry[dataset_name]
+
+    tokenizer = AutoTokenizer.from_pretrained(
+        pretrained_model_name_or_path=tokenizer_name,
+        use_fast=True,
+    )
+
+    dataset = dataset_class(
+        tokenizer=tokenizer,
+        train_split_ratio_for_val=train_split_ratio_for_val,
+        max_seq_length=max_seq_length,
+        batch_size=batch_size,
+        num_workers=num_workers,
+    )
+
     return dataset

@@ -1,8 +1,8 @@
 # metadata specialised for each experiment
 core:
-  project_name: task-vectors-playground
+  project_name: higher-order-task-arithmetics
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
-  entity: gladia
+  entity: dansolombrinoandfriends
   version: 0.0.1
   tags: null
 

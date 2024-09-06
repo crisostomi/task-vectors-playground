@@ -5,10 +5,15 @@ batch_size:
   val: 32
 data_path: ${oc.env:PROJECT_ROOT}/data
 defaults:
-- dataset: svhn
+- dataset: cola
 - _self_
+max_seq_length: 128
 num_workers:
   test: 0
   train: 4
   val: 2
-train_dataset: ${nn.data.dataset.dataset_name}Val
+splits_pct:
+  test: 0.1
+  train: 0.8
+  val: 0.1
+train_dataset: ${nn.data.dataset.dataset_name}

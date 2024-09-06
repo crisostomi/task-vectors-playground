@@ -7,6 +7,7 @@ import torch
 from nn_core.serialization import load_model
 
 from tvp.modules.encoder import ClassificationHead, ImageEncoder
+from tvp.modules.text_encoder import TextEncoder
 
 pylogger = logging.getLogger(__name__)
 
@@ -25,6 +26,10 @@ def load_model_from_artifact(run, artifact_path):
         model = model_class(**artifact.metadata)
     elif model_class == ClassificationHead:
         model = model_class(normalize=True, **artifact.metadata)
+    elif model_class == TextEncoder:
+        model = model_class(**artifact.metadata)
+    else:
+        raise ValueError(f"Unknown model class {model_class}")
 
     model.load_state_dict(torch.load(ckpt_path))
 
