@@ -44,6 +44,7 @@ num_to_th = {
 
 def run(cfg: DictConfig):
     
+    
     seed_index_everything(cfg)
 
     
@@ -52,7 +53,11 @@ def run(cfg: DictConfig):
     )
 
 
-    logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
+    logger: NNLogger = NNLogger(
+        logging_cfg=cfg.train.logging, 
+        cfg=cfg, 
+        resume_id=template_core.resume_id
+    )
 
     
     if cfg.order == 1:
@@ -147,26 +152,22 @@ def run(cfg: DictConfig):
         ckpt_path=template_core.trainer_ckpt_path
     )
 
-    pylogger.info("OK line 151!")
-    exit()
-
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_10Eps1Order"
+
     artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_7Eps1stOrder"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
-
-    model_class = get_class(image_encoder)
+    model_class = get_class(text_encoder)
     
-    #metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "sparseClipping"}
-    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class}
+    metadata = {
+        "model_name": cfg.nn.module.model.model_name, 
+        "model_class": model_class
+    }
+
     upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
 
+    
     if logger is not None:
         logger.experiment.finish()
 
