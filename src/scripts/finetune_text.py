@@ -87,7 +87,7 @@ def run(cfg: DictConfig):
 
     if cfg.reset_classification_head:
         classification_head = get_classification_head(
-            hidden_size=cfg.nn.module.model.hidden_size,
+            input_size=cfg.nn.module.model.hidden_size,
             num_classes=cfg.nn.data.dataset.num_classes
         )
 

@@ -33,7 +33,7 @@ def upload_pt_artifact_to_wandb():
     from tvp.utils.io_utils import get_class
 
     model = TextEncoder(
-        pretrained_model_name="roberta-base",
+        model_name="roberta-base",
         cache_dir="cache"
     )
 
@@ -53,12 +53,12 @@ def upload_pt_artifact_to_wandb():
         cfg=None,
         metadata={
             "model_name": "RoBERTa-base", 
-            "model_class": get_class(model)
+            "model_class": "tvp.modules.text_encoder.TextEncoder"
         }
     )
 
 
 if __name__ == "__main__":
-    # upload_pt_artifact_to_wandb()
+    upload_pt_artifact_to_wandb()
 
     pass

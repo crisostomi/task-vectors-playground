@@ -48,5 +48,5 @@ for order in range(1, desired_orders+1):
 
         subprocess.run(["python", "src/scripts/finetune_text.py"], check=True)
 
-    # subprocess.run(["python", "src/scripts/evaluate.py"], check=True)
+    subprocess.run(["python", "src/scripts/evaluate_text.py"], check=True)
     

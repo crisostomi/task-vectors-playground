@@ -8,6 +8,7 @@ from nn_core.serialization import load_model
 
 from tvp.modules.encoder import ClassificationHead, ImageEncoder
 from tvp.modules.text_encoder import TextEncoder
+from tvp.modules.text_heads import TextClassificationHead
 
 pylogger = logging.getLogger(__name__)
 
@@ -27,6 +28,8 @@ def load_model_from_artifact(run, artifact_path):
     elif model_class == ClassificationHead:
         model = model_class(normalize=True, **artifact.metadata)
     elif model_class == TextEncoder:
+        model = model_class(**artifact.metadata)
+    elif model_class == TextClassificationHead:
         model = model_class(**artifact.metadata)
     else:
         raise ValueError(f"Unknown model class {model_class}")

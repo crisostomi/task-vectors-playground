@@ -4,12 +4,12 @@ from torch import Tensor
 
 
 class TextClassificationHead(torch.nn.Module):
-    def __init__(self, hidden_size: int, num_classes: int):
+    def __init__(self, input_size: int, num_classes: int, **kwargs):
         
         super().__init__()
         
         self.classification_head: torch.nn.Linear = torch.nn.Linear(
-            hidden_size, num_classes
+            input_size, num_classes
         )
 
         self.out_features = num_classes
@@ -22,9 +22,9 @@ class TextClassificationHead(torch.nn.Module):
 
 
 def get_classification_head(
-    hidden_size: int, 
+    input_size: int, 
     num_classes: int
 ):
-    classification_head = TextClassificationHead(hidden_size, num_classes)
+    classification_head = TextClassificationHead(input_size, num_classes)
 
     return classification_head
