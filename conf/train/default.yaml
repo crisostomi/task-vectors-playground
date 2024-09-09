@@ -50,7 +50,7 @@ logging:
     _target_: lightning.pytorch.loggers.WandbLogger
 
     project: ${core.project_name}
-    entity: gladia
+    entity: dansolombrinoandfriends
     log_model: false
     mode: 'online'
     tags: ${core.tags}

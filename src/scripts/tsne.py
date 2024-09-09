@@ -6,6 +6,9 @@ from sklearn.manifold import TSNE
 #from openTSNE import TSNE
 import matplotlib.pyplot as plt
 
+plt.rc('xtick', labelsize=16) 
+plt.rc('ytick', labelsize=16) 
+
 
 def run():
     wandb.login()
@@ -123,7 +126,7 @@ def run():
         plt.xlabel('t-SNE Dimension 1')
         plt.ylabel('t-SNE Dimension 2')
         plt.grid(True)
-        plt.legend()
+        plt.legend(prop={'size': 14})
         plt.show()
 
 

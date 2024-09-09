@@ -5,13 +5,13 @@ import yaml
 import subprocess
 
 epoch_divisor = "None"
-desired_orders = 5
+desired_orders = 35
 
 yaml_file = "conf/nn/data/default.yaml"
 ft_conf_file = "conf/finetune.yaml"
 tv_conf_file = "conf/task_vectors.yaml"
 
-for order in range(1, desired_orders+1):
+for order in range(31, desired_orders+1):
 
     # adjust hyperparameters in finetune.yaml
     with open(ft_conf_file, "r") as file:

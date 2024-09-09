@@ -2,7 +2,7 @@ conventions:
   x_key: x
   y_key: y
 core:
-  entity: gladia
+  entity: dansolombrinoandfriends
   project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
   tags:
@@ -36,7 +36,8 @@ task_vectors:
     mean: true
   breadcrumbs_beta: 0.85
   breadcrumbs_gamma: 0.993
-  merging_method: normal
+  merging_method: dare
+  dare_rate: 0.9
   num_task_vectors: 8
   orthogonalize: false
   scaling_coefficient: 1
