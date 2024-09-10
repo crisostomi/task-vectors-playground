@@ -1,0 +1,5 @@
+_target_: tvp.modules.text_encoder.TextEncoder
+model_name: BERT-base-uncased
+hidden_size: 768
+cache_dir: ${misc.cache_dir}
+keep_lang: ??

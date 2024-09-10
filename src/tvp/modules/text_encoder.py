@@ -33,7 +33,7 @@ def upload_pt_artifact_to_wandb():
     from tvp.utils.io_utils import get_class
 
     model = TextEncoder(
-        model_name="roberta-base",
+        model_name="bert-base-uncased",
         cache_dir="cache"
     )
 
@@ -45,14 +45,14 @@ def upload_pt_artifact_to_wandb():
 
     upload_model_to_wandb(
         model=model,
-        artifact_name="RoBERTa-base_pt",
+        artifact_name="BERT-base-uncased_pt",
         run=wandb.init(
             project="higher-order-task-arithmetics",
             entity="dansolombrinoandfriends",
         ),
         cfg=None,
         metadata={
-            "model_name": "RoBERTa-base", 
+            "model_name": "BERT-base-uncased", 
             "model_class": "tvp.modules.text_encoder.TextEncoder"
         }
     )

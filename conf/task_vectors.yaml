@@ -16,6 +16,12 @@ defaults:
 - _self_
 epoch_divisor: None
 eval_datasets:
+- CoLA
+- SST2
+- MRPC
+- QQP
+- MNLI
+- QNLI
 - RTE
 eval_on_train: false
 misc:
