@@ -5,7 +5,7 @@ batch_size:
   val: 32
 data_path: ${oc.env:PROJECT_ROOT}/data
 defaults:
-- dataset: svhn
+- dataset: cifar100
 - _self_
 num_workers:
   test: 0
