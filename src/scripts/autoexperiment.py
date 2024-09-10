@@ -33,7 +33,7 @@ for order in range(1, desired_orders+1):
     
 
     # datasets = ["cifar100", "dtd", "eurosat", "gtsrb", "mnist", "resisc45", "svhn"]
-    datasets = ["rte"]
+    datasets = ["cola", "sst2", "mrpc", "qqp", "mnli", "qnli", "rte"]
     for dataset_id, dataset in enumerate(datasets): # modify the dataset hyperparameter in config
 
         print(f"[bold]\n\n\n{dataset} ({dataset_id + 1}/{len(datasets)}), order ({order}/{desired_orders})\n\n\n")
