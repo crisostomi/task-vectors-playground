@@ -5,7 +5,7 @@ batch_size:
   val: 32
 data_path: ${oc.env:PROJECT_ROOT}/data
 defaults:
-- dataset: rte
+- dataset: mnli
 - _self_
 max_seq_length: 128
 num_workers:

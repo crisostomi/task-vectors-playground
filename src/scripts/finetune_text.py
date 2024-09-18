@@ -73,7 +73,9 @@ def run(cfg: DictConfig):
     if cfg.order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" 
     else:
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
+        #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
+        eroshot_identifier = f"{cfg.nn.module.model.model_name}_pcgrad_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
+
 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
@@ -165,7 +167,8 @@ def run(cfg: DictConfig):
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_pcgrad_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
     model_class = get_class(text_encoder)
     

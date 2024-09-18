@@ -103,12 +103,13 @@ def run(cfg: DictConfig) -> str:
     if order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
     else:
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_{cfg.seed_index}" 
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.task_vectors.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_{cfg.seed_index}" 
     
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_{cfg.epochs}Eps{order}{num_to_th[order]}Order:latest"
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_{cfg.epochs}Eps{order}{num_to_th[order]}Order:latest"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_{cfg.task_vectors.merging_method}_{cfg.epochs}Eps{order}{num_to_th[order]}Order:latest"
 
 
     finetuned_models = {
