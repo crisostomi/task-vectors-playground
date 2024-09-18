@@ -40,6 +40,8 @@ from typing import Dict, List
 from src.scripts.competitors.my_ties import ties_merging
 from src.scripts.competitors.my_breadcrumbs import model_breadcrumbs
 from src.scripts.competitors.their_ties import *
+from src.scripts.competitors.my_dare import *
+from src.scripts.my_pcgrad import *
 
 
 pylogger = logging.getLogger(__name__)
@@ -48,7 +50,7 @@ torch.set_float32_matmul_precision("high")
 
 
 def run(cfg: DictConfig) -> str:
-    epoch_divisor = cfg.epoch_divisor
+    epochs = cfg.epochs
     order = cfg.order
 
     num_to_th = {
@@ -61,7 +63,17 @@ def run(cfg: DictConfig) -> str:
     7: "th",
     8: "th",
     9: "th",
-    10:"th"
+    10:"th",
+    11: "th",
+    12: "th",
+    13: "th",
+    14: "th",
+    15: "th",
+    16: "th",
+    17: "th",
+    18: "th",
+    19: "th",
+    20:"th"
 }
 
     """Generic train loop.
@@ -91,13 +103,12 @@ def run(cfg: DictConfig) -> str:
     if order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
     else:
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{cfg.epoch_divisor}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0:latest" 
-
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_{cfg.seed_index}" 
     
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:latest"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_{cfg.epochs}Eps{order}{num_to_th[order]}Order:latest"
 
 
     finetuned_models = {
@@ -147,7 +158,14 @@ def run(cfg: DictConfig) -> str:
     elif cfg.task_vectors.merging_method == "breadcrumbs":
         print("\nRunning Model Breadcrumbs...\n")
         task_vectors = model_breadcrumbs(task_vectors,beta=cfg.task_vectors.breadcrumbs_beta, gamma=cfg.task_vectors.breadcrumbs_gamma)
+    elif cfg.task_vectors.merging_method == "dare":
+        print("\nRunning DARE...\n")
+        task_vectors = my_dare(task_vectors, ref_model=zeroshot_model, p=cfg.task_vectors.dare_rate)
+    elif cfg.task_vectors.merging_method == "pcgrad":
+        print("\nRunning PCGrad...\n")
+        task_vectors = my_pcgrad(task_vectors)
     else: print("\nRunning vanilla merging...\n")
+
     if cfg.task_vectors.orthogonalize:
         task_vectors = tv_orthogonalization(task_vectors, method='gs')
 
@@ -163,7 +181,8 @@ def run(cfg: DictConfig) -> str:
     apply_task_vector(task_equipped_model, delta_model.state_dict(), scaling_coef=cfg.task_vectors.scaling_coefficient)
 
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_{epochs}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.task_vectors.merging_method}_{epochs}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
 
     metadata = {"model_name": f"{cfg.nn.module.model.model_name}", "model_class": "tvp.modules.text_encoder.TextEncoder"}
 
@@ -186,13 +205,14 @@ def run(cfg: DictConfig) -> str:
         )
 
         dataset = get_text_dataset(
-            dataset_name=cfg.nn.data.train_dataset,
+            dataset_name=dataset_name,
             tokenizer_name=cfg.nn.module.model.model_name,
             train_split_ratio_for_val=cfg.nn.data.splits_pct.val,
             max_seq_length=cfg.nn.data.max_seq_length,
             batch_size=cfg.nn.data.batch_size.train,
             num_workers=cfg.nn.data.num_workers.train
         )
+
 
         callbacks: List[Callback] = build_callbacks(cfg.train.callbacks, template_core)
 

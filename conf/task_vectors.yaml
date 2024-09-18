@@ -15,6 +15,7 @@ defaults:
 - train: default
 - _self_
 epoch_divisor: None
+epochs: 1
 eval_datasets:
 - CoLA
 - SST2
@@ -37,7 +38,8 @@ task_vectors:
     mean: true
   breadcrumbs_beta: 0.85
   breadcrumbs_gamma: 0.993
-  merging_method: normal
+  dare_rate: 0.9
+  merging_method: pcgrad
   num_task_vectors: 8
   orthogonalize: false
   scaling_coefficient: 1

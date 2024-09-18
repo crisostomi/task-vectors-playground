@@ -39,7 +39,17 @@ num_to_th = {
     7: "th",
     8: "th",
     9: "th",
-    10:"th"
+    10:"th",
+    11: "th",
+    12: "th",
+    13: "th",
+    14: "th",
+    15: "th",
+    16: "th",
+    17: "th",
+    18: "th",
+    19: "th",
+    20:"th"
 }
 
 def run(cfg: DictConfig):
@@ -63,8 +73,7 @@ def run(cfg: DictConfig):
     if cfg.order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" 
     else:
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{cfg.epoch_divisor}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
-
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
@@ -139,7 +148,7 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        max_epochs=1, 
+        max_epochs=cfg.epochs, 
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
@@ -156,7 +165,7 @@ def run(cfg: DictConfig):
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
 
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
     model_class = get_class(text_encoder)
     

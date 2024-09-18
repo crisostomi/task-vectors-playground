@@ -87,7 +87,7 @@ def run(cfg: DictConfig) -> str:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
     else:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_0" 
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_10Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_{cfg.seed_index}"
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_4Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_{cfg.seed_index}"
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_PosthocClipAndTrain0.1:v0" 
@@ -98,7 +98,7 @@ def run(cfg: DictConfig) -> str:
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:latest"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One4Eps1stOrder:v0"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_10Eps1stOrder:latest"
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_4Eps1stOrder:latest"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2Eps{cfg.order}{num_to_th[cfg.order]}Order:latest"
 
 
@@ -172,9 +172,9 @@ def run(cfg: DictConfig) -> str:
     #artifact_name = f"{cfg.nn.module.model.model_name}_10Eps_UnifiedModel_{cfg.seed_index}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_TIEScrumbs10EpsUnifiedModel_{cfg.seed_index}"
     #Eps{cfg.order}{num_to_th[cfg.order]}
-    artifact_name = f"{cfg.nn.module.model.model_name}_Breadcrumbs10Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_Breadcrumbs10Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
     metadata = {"model_name": f"{cfg.nn.module.model.model_name}", "model_class": "tvp.modules.encoder.ImageEncoder"}
-    upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
+    #upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 
 
     seed_index_everything(cfg)

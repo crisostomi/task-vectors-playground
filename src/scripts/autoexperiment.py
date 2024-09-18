@@ -5,7 +5,8 @@ import yaml
 import subprocess
 
 epoch_divisor = "None"
-desired_orders = 1
+desired_orders = 10
+epochs = 1
 
 yaml_file = "conf/nn/data/default.yaml"
 ft_conf_file = "conf/finetune.yaml"
@@ -17,6 +18,7 @@ for order in range(1, desired_orders+1):
     with open(ft_conf_file, "r") as file:
             config = yaml.safe_load(file)
             config['epoch_divisor'] = epoch_divisor
+            config['epochs'] = epochs
             config['order'] = order
             print(config)
     with open(ft_conf_file, "w") as file:
@@ -26,6 +28,7 @@ for order in range(1, desired_orders+1):
     with open(tv_conf_file, "r") as file:
             config = yaml.safe_load(file)
             config['epoch_divisor'] = epoch_divisor
+            config['epochs'] = epochs
             config['order'] = order
             print(config)
     with open(tv_conf_file, "w") as file:
@@ -34,6 +37,7 @@ for order in range(1, desired_orders+1):
 
     # datasets = ["cifar100", "dtd", "eurosat", "gtsrb", "mnist", "resisc45", "svhn"]
     datasets = ["cola", "sst2", "mrpc", "qqp", "mnli", "qnli", "rte"]
+    #datasets = []
     for dataset_id, dataset in enumerate(datasets): # modify the dataset hyperparameter in config
 
         print(f"[bold]\n\n\n{dataset} ({dataset_id + 1}/{len(datasets)}), order ({order}/{desired_orders})\n\n\n")
