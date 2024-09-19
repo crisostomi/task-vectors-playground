@@ -1,10 +1,9 @@
 conventions:
-  attn_mask_key: attention_mask
-  x_key: input_ids
-  y_key: labels
+  x_key: x
+  y_key: y
 core:
   entity: dansolombrinoandfriends
-  project_name: higher-order-task-arithmetics
+  project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
   tags:
   - dev
@@ -17,15 +16,14 @@ defaults:
 epoch_divisor: None
 epochs: 1
 eval_datasets:
-- CoLA
-- SST2
-- MRPC
-- QQP
-- MNLI
-- QNLI
-- RTE
+- CIFAR100
+- DTD
+- EuroSAT
+- GTSRB
+- MNIST
+- RESISC45
+- SVHN
 eval_on_train: false
-merging_method: pcgrad
 misc:
   cache_dir: null
   ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}
@@ -40,17 +38,17 @@ task_vectors:
   breadcrumbs_beta: 0.85
   breadcrumbs_gamma: 0.993
   dare_rate: 0.9
-  merging_method: pcgrad
+  merging_method: normal
   num_task_vectors: 8
   orthogonalize: false
   scaling_coefficient: 1
   ties_lambda: 1
   ties_topk: 0.15
   to_apply:
-  - CoLA
-  - SST2
-  - MRPC
-  - QQP
-  - MNLI
-  - QNLI
-  - RTE
+  - CIFAR100
+  - DTD
+  - EuroSAT
+  - GTSRB
+  - MNIST
+  - RESISC45
+  - SVHN
