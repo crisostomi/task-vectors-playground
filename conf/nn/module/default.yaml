@@ -2,8 +2,8 @@
 defaults:
   - _self_
   # - model: vit
-  - model: roberta
-  #- model: bert
+  #- model: roberta
+  - model: bert
 
 # _target_: tvp.pl_module.image_classifier.ImageClassifier
 _target_: tvp.pl_module.text_classifier.TextClassifier
