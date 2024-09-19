@@ -41,6 +41,7 @@ from competitors.my_ties import ties_merging
 from competitors.my_breadcrumbs import model_breadcrumbs
 from competitors.their_ties import *
 from competitors.my_dare import *
+from my_pcgrad import *
 
 
 pylogger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ torch.set_float32_matmul_precision("high")
 
 
 def run(cfg: DictConfig) -> str:
-    epoch_divisor = cfg.epoch_divisor
+    epochs = cfg.epochs
     order = cfg.order
 
     num_to_th = {
@@ -112,8 +113,7 @@ def run(cfg: DictConfig) -> str:
     if order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt"
     else:
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_0" 
-        #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_10Eps{order-1}{num_to_th[order-1]}OrderUnifiedModel_{cfg.seed_index}"
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.task_vectors.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_{cfg.seed_index}" 
     zeroshot_model = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
 
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_PosthocClipAndTrain0.1:v0" 
@@ -124,9 +124,9 @@ def run(cfg: DictConfig) -> str:
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One{epoch_divisor}Eps{order}{num_to_th[order]}Order:latest"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_One4Eps1stOrder:v0"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}:v0"
-    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_10Eps1stOrder:latest"
+    #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_10Eps1stOrder:latest"
     #finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_2Eps{cfg.order}{num_to_th[cfg.order]}Order:latest"
-
+    finetuned_id_fn = lambda dataset: f"{cfg.nn.module.model.model_name}_{dataset}_{cfg.seed_index}_{cfg.task_vectors.merging_method}_{cfg.epochs}Eps{order}{num_to_th[order]}Order:latest"
 
     finetuned_models = {
         dataset: load_model_from_artifact(artifact_path=finetuned_id_fn(dataset), run=logger.experiment)
@@ -178,6 +178,9 @@ def run(cfg: DictConfig) -> str:
     elif cfg.task_vectors.merging_method == "dare":
         print("\nRunning DARE Merging...\n")
         task_vectors = my_dare(task_vectors, ref_model=zeroshot_model, p=cfg.task_vectors.dare_rate)
+    elif cfg.task_vectors.merging_method == "pcgrad": 
+        print("\nRunning PCGrad...\n")
+        task_vectors = my_pcgrad(task_vectors)
     else: print("\nRunning vanilla merging...\n")
     if cfg.task_vectors.orthogonalize:
         task_vectors = tv_orthogonalization(task_vectors, method='gs')
@@ -196,14 +199,14 @@ def run(cfg: DictConfig) -> str:
 
     # Save the unified model as artifact
     #artifact_name = f"{cfg.nn.module.model.model_name}_2stOrderUnifiedModel_{cfg.seed_index}"
-    artifact_name = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_One{epoch_divisor}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_HalfEpsSomeDatasets2ndOrderUnifiedModel_{cfg.seed_index}" #################
     #artifact_name = f"{cfg.nn.module.model.model_name}_10Eps_UnifiedModel_{cfg.seed_index}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_TIEScrumbs10EpsUnifiedModel_{cfg.seed_index}"
     #Eps{cfg.order}{num_to_th[cfg.order]}
-    #artifact_name = f"{cfg.nn.module.model.model_name}_Breadcrumbs10Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.task_vectors.merging_method}_{epochs}Eps{order}{num_to_th[order]}OrderUnifiedModel_{cfg.seed_index}"
     metadata = {"model_name": f"{cfg.nn.module.model.model_name}", "model_class": "tvp.modules.encoder.ImageEncoder"}
-    #upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
+    upload_model_to_wandb(task_equipped_model, artifact_name, logger.experiment, cfg, metadata)
 
 
     seed_index_everything(cfg)

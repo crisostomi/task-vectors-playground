@@ -19,10 +19,10 @@ from nn_core.common.utils import enforce_tags, seed_index_everything
 from nn_core.model_logging import NNLogger
 from nn_core.serialization import NNCheckpointIO
 
-from tvp.data.datasets.registry import get_dataset
-from tvp.modules.encoder import ImageEncoder
-from tvp.modules.heads import get_classification_head
-from tvp.pl_module.image_classifier import ImageClassifier
+from tvp.data.datasets.registry import get_text_dataset
+from tvp.modules.text_encoder import TextEncoder
+from tvp.modules.text_heads import get_classification_head
+from tvp.pl_module.text_classifier import TextClassifier
 from tvp.utils.io_utils import get_class, load_model_from_artifact
 from tvp.utils.utils import LabelSmoothing, build_callbacks
 
@@ -40,84 +40,83 @@ num_to_th = {
     8: "th",
     9: "th",
     10:"th",
-    11:"th",
-    12:"th",
-    13:"th",
-    14:"th",
-    15:"th",
-    16:"th",
-    17:"th",
-    18:"th",
-    19:"th",
-    20:"th",
-    21:"th",
-    22:"th",
-    23:"th",
-    24:"th",
-    25:"th",
-    26:"th",
-    27:"th",
-    28:"th",
-    29:"th",
-    30:"th",
-    31:"th",
-    32:"th",
-    33:"th",
-    34:"th",
-    35:"th",
+    11: "th",
+    12: "th",
+    13: "th",
+    14: "th",
+    15: "th",
+    16: "th",
+    17: "th",
+    18: "th",
+    19: "th",
+    20:"th"
 }
 
-
 def run(cfg: DictConfig):
+    
+    
     seed_index_everything(cfg)
 
+    
     template_core: NNTemplateCore = NNTemplateCore(
         restore_cfg=cfg.train.get("restore", None),
     )
 
-    logger: NNLogger = NNLogger(logging_cfg=cfg.train.logging, cfg=cfg, resume_id=template_core.resume_id)
 
-    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" # pretrained checkpoint
-    #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_0__PosthocClipping0.1" # for additional fine-tuning
+    logger: NNLogger = NNLogger(
+        logging_cfg=cfg.train.logging, 
+        cfg=cfg, 
+        resume_id=template_core.resume_id
+    )
+
+    
     if cfg.order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" 
     else:
         #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
-        eroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0"  
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
 
 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
 
+    
     if cfg.reset_pretrained_model:
-        image_encoder: ImageEncoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
-        model_class = get_class(image_encoder)
-
+        text_encoder: TextEncoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
+        
+        model_class = get_class(text_encoder)
         metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class}
-        upload_model_to_wandb(image_encoder, zeroshot_identifier, logger.experiment, cfg, metadata)
+        
+        upload_model_to_wandb(
+            text_encoder, zeroshot_identifier, logger.experiment, cfg, metadata
+        )
 
     else:
-        image_encoder = load_model_from_artifact(artifact_path=f"{zeroshot_identifier}:latest", run=logger.experiment)
+        text_encoder = load_model_from_artifact(
+            artifact_path=f"{zeroshot_identifier}:latest", 
+            run=logger.experiment
+        )
 
     if cfg.reset_classification_head:
         classification_head = get_classification_head(
-            cfg.nn.module.model.model_name,
-            cfg.nn.data.train_dataset,
-            cfg.nn.data.data_path,
-            cfg.misc.ckpt_path,
-            cache_dir=cfg.misc.cache_dir,
-            openclip_cachedir=cfg.misc.openclip_cachedir,
+            input_size=cfg.nn.module.model.hidden_size,
+            num_classes=cfg.nn.data.dataset.num_classes
         )
 
         model_class = get_class(classification_head)
+        
         metadata = {
             "model_name": cfg.nn.module.model.model_name,
             "model_class": model_class,
             "num_classes": cfg.nn.data.dataset.num_classes,
-            "input_size": classification_head.in_features,
+            "input_size": cfg.nn.module.model.hidden_size,
         }
 
         upload_model_to_wandb(
-            classification_head, classification_head_identifier, logger.experiment, cfg, metadata=metadata
+            classification_head, 
+            classification_head_identifier, 
+            logger.experiment, 
+            cfg, 
+            metadata=metadata
         )
 
     else:
@@ -126,15 +125,19 @@ def run(cfg: DictConfig):
             run=logger.experiment
         )
 
-    model: ImageClassifier = hydra.utils.instantiate(
-        cfg.nn.module, encoder=image_encoder, classifier=classification_head, _recursive_=False
+    model: TextClassifier = hydra.utils.instantiate(
+        cfg.nn.module, 
+        encoder=text_encoder, classifier=classification_head, 
+        _recursive_=False
     )
 
-    dataset = get_dataset(
-        cfg.nn.data.train_dataset,
-        preprocess_fn=model.encoder.train_preprocess,
-        location=cfg.nn.data.data_path,
+    dataset = get_text_dataset(
+        dataset_name=cfg.nn.data.train_dataset,
+        tokenizer_name=cfg.nn.module.model.model_name,
+        train_split_ratio_for_val=cfg.nn.data.splits_pct.val,
+        max_seq_length=cfg.nn.data.max_seq_length,
         batch_size=cfg.nn.data.batch_size.train,
+        num_workers=cfg.nn.data.num_workers.train
     )
 
     model.freeze_head()
@@ -147,33 +150,36 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        #max_epochs=int(cfg.nn.data.dataset.ft_epochs/cfg.epoch_divisor),
-        max_epochs = cfg.epochs, 
+        max_epochs=cfg.epochs, 
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
     )
 
     pylogger.info("Starting training!")
-    trainer.fit(model=model, train_dataloaders=dataset.train_loader, ckpt_path=template_core.trainer_ckpt_path)
+    trainer.fit(
+        model=model, 
+        train_dataloaders=dataset.train_loader, 
+        ckpt_path=template_core.trainer_ckpt_path
+    )
 
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_10Eps1Order"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_7Eps1stOrder"
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_10Eps{cfg.order}{num_to_th[cfg.order]}Order"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
-    model_class = get_class(image_encoder)
+    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_pcgrad_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+
+    model_class = get_class(text_encoder)
     
-    #metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class, "strategy: ": "sparseClipping"}
-    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class}
+    metadata = {
+        "model_name": cfg.nn.module.model.model_name, 
+        "model_class": model_class
+    }
+
     upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
 
+    
     if logger is not None:
         logger.experiment.finish()
 
