@@ -7,6 +7,7 @@ import subprocess
 epoch_divisor = "None"
 desired_orders = 10
 epochs = 1
+merging_method = "pcgrad"
 
 yaml_file = "conf/nn/data/default.yaml"
 ft_conf_file = "conf/finetune.yaml"
@@ -20,6 +21,7 @@ for order in range(1, desired_orders+1):
             config['epoch_divisor'] = epoch_divisor
             config['epochs'] = epochs
             config['order'] = order
+            config['merging_method'] = merging_method
             print(config)
     with open(ft_conf_file, "w") as file:
         yaml.dump(config, file)
@@ -30,6 +32,7 @@ for order in range(1, desired_orders+1):
             config['epoch_divisor'] = epoch_divisor
             config['epochs'] = epochs
             config['order'] = order
+            config['merging_method'] = merging_method
             print(config)
     with open(tv_conf_file, "w") as file:
         yaml.dump(config, file)
