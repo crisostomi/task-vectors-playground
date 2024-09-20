@@ -1,6 +1,7 @@
 conventions:
-  x_key: x
-  y_key: y
+  attn_mask_key: attention_mask
+  x_key: input_ids
+  y_key: labels
 core:
   entity: dansolombrinoandfriends
   project_name: higher-order-task-arithmetics
