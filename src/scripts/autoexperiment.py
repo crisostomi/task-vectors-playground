@@ -21,7 +21,7 @@ for order in range(1, desired_orders+1):
             config['epoch_divisor'] = epoch_divisor
             config['epochs'] = epochs
             config['order'] = order
-            config['merging_method'] = merging_method
+            config['task_vectors']['merging_method'] = merging_method # normal, ties, breadcrumbs, dare, pcgrad
             print(config)
     with open(ft_conf_file, "w") as file:
         yaml.dump(config, file)
