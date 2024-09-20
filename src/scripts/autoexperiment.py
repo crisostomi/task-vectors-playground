@@ -29,7 +29,7 @@ for order in range(1, desired_orders+1):
             config = yaml.safe_load(file)
             config['epochs'] = epochs
             config['order'] = order
-            config['merging_method'] = merging_method
+            config['task_vectors']['merging_method'] = merging_method
             print(config)
     with open(tv_conf_file, "w") as file:
         yaml.dump(config, file)
