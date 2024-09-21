@@ -5,23 +5,47 @@ import numpy as np
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
+"""plt.rcParams.update({
+    "text.usetex": True,            # Use LaTeX for text rendering
+    "font.family": "serif",         # Set font family to serif
+    "font.serif": ["Times", "Palatino", "serif"],  # Specify serif fonts (you can customize this list)
+    "axes.unicode_minus": False     # Fix for minus sign rendering
+})"""
+
+plt.rcParams["font.family"] = "serif"
+plt.rcParams["text.usetex"] = True
+
+plt.rc('xtick', labelsize=16) 
+plt.rc('ytick', labelsize=16) 
+
+wandb.login()
 
 def run():
     wandb.login()
 
 
     num_to_th = {
-        1: "st",
-        2: "nd",
-        3: "rd",
-        4: "th",
-        5: "th",
-        6: "th",
-        7: "th",
-        8: "th",
-        9: "th",
-        10: "th"
-    }
+    1: "st",
+    2: "nd",
+    3: "rd",
+    4: "th",
+    5: "th",
+    6: "th",
+    7: "th",
+    8: "th",
+    9: "th",
+    10:"th",
+    11:"th",
+    12:"th",
+    13:"th",
+    14:"th",
+    15:"th",
+    16:"th",
+    17:"th",
+    18:"th",
+    19:"th",
+    20:"th",
+}
 
     datasets = ["CIFAR100", "DTD", "EuroSAT", "GTSRB", "MNIST", "RESISC45",  "SVHN"]
 
@@ -94,7 +118,8 @@ def run():
     collective_arr = np.vstack([pt_arr, tva_arr, ties_arr, bc_arr, hota_arr])
 
     # Labels for each point
-    labels = ['Pretrained', 'Task Arithmetic', 'TIES', 'Breadcrumbs'] + [f'HOTA {i+1}th' for i in range(hota_arr.shape[0])]
+    #labels = ['Pretrained', 'Task Arithmetic', 'TIES', 'Breadcrumbs'] + [f'{i+1}{num_to_th[i+1]}' for i in range(hota_arr.shape[0])]
+    labels = ['', '', '', ''] + [f'{i+1}{num_to_th[i+1]}' for i in range(hota_arr.shape[0])]
 
     # Grouping information (assign a group ID to each array)
     group_ids = ['Pretrained'] * pt_arr.shape[0] + ['Task Arithmetic'] * tva_arr.shape[0] + ['TIES'] * ties_arr.shape[0] + ['Breadcrumbs'] * bc_arr.shape[0] + ['HOTA'] * hota_arr.shape[0]
@@ -106,7 +131,7 @@ def run():
     data_2d = pca.fit_transform(collective_arr)
 
     # Create a plot
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(6, 4))
 
     # Plot the 2D result, assigning colors based on group ID
     for group_id, color in colors.items():
@@ -115,12 +140,12 @@ def run():
 
     # Annotate each point with its label
     for i in range(data_2d.shape[0]):
-        plt.annotate(labels[i], (data_2d[i, 0], data_2d[i, 1]), fontsize=8, alpha=0.8)
+        plt.annotate(labels[i], (data_2d[i, 0], data_2d[i, 1]), fontsize=13, alpha=0.8)
 
-    plt.xlabel('PC1')
-    plt.ylabel('PC2')
+    #plt.xlabel('PC1', fontsize=11)
+    #plt.ylabel('PC2', fontsize=11)
     plt.grid(True)
-    plt.legend()
+    plt.legend(prop={'size': 12})
     plt.show()
 
 

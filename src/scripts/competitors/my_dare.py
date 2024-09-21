@@ -22,4 +22,5 @@ def my_dare(flattened_vectors, ref_model, p=0.9):
         
         pruned_flattened_vector = parameters_to_vector(ref_model_copy.parameters())
         pruned_vectors.append(pruned_flattened_vector)
+
         return torch.stack(pruned_vectors)

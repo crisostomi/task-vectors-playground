@@ -4,7 +4,7 @@ conventions:
   y_key: labels
 core:
   entity: dansolombrinoandfriends
-  project_name: higher-order-task-arithmetics
+  project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
   tags:
   - dev

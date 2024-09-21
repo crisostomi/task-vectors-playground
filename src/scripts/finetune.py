@@ -39,8 +39,34 @@ num_to_th = {
     7: "th",
     8: "th",
     9: "th",
-    10:"th"
+    10:"th",
+    11:"th",
+    12:"th",
+    13:"th",
+    14:"th",
+    15:"th",
+    16:"th",
+    17:"th",
+    18:"th",
+    19:"th",
+    20:"th",
+    21:"th",
+    22:"th",
+    23:"th",
+    24:"th",
+    25:"th",
+    26:"th",
+    27:"th",
+    28:"th",
+    29:"th",
+    30:"th",
+    31:"th",
+    32:"th",
+    33:"th",
+    34:"th",
+    35:"th",
 }
+
 
 def run(cfg: DictConfig):
     seed_index_everything(cfg)
@@ -56,8 +82,9 @@ def run(cfg: DictConfig):
     if cfg.order == 1:
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" 
     else:
-        #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_One{cfg.epoch_divisor}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_4Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
+        #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0"  
+
 
 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
@@ -122,25 +149,33 @@ def run(cfg: DictConfig):
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
         #max_epochs=int(cfg.nn.data.dataset.ft_epochs/cfg.epoch_divisor),
-        max_epochs = 4, 
+        max_epochs = cfg.epochs, 
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
     )
 
-    pylogger.info("Starting training!")
-    trainer.fit(model=model, train_dataloaders=dataset.train_loader, ckpt_path=template_core.trainer_ckpt_path)
+    pylogger.info(f"Starting fine-tuning on {cfg.ft_on_data_split} data split!")
+    if cfg.ft_on_data_split == "train":
+        ft_dataloader = dataset.train_loader
+    elif cfg.ft_on_data_split == "val":
+        ft_dataloader = dataset.val_loader
+    else:
+        raise ValueError(f"Unknown data split to fine-tune on: {cfg.ft_on_data_split}. Possible values: \"train\" or \"val\"")
+    
+    trainer.fit(model=model, train_dataloaders=ft_dataloader, ckpt_path=template_core.trainer_ckpt_path)
 
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_10Eps1Order"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_One{cfg.epoch_divisor}Eps{cfg.order}{num_to_th[cfg.order]}Order"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_sparseClipping{str(model.sparsity_percentile)}"
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_2ndOrder" #2nd order means that the model is trained on the 1st order unified model
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_7Eps1stOrder"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_4Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
+    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_10Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
     model_class = get_class(image_encoder)
     

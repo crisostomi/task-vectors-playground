@@ -4,9 +4,8 @@ from rich import print
 import yaml
 import subprocess
 
-epoch_divisor = "None"
-desired_orders = 10
 epochs = 1
+desired_orders = 10
 merging_method = "pcgrad"
 
 yaml_file = "conf/nn/data/default.yaml"
@@ -18,10 +17,9 @@ for order in range(2, desired_orders+1):
     # adjust hyperparameters in finetune.yaml
     with open(ft_conf_file, "r") as file:
             config = yaml.safe_load(file)
-            config['epoch_divisor'] = epoch_divisor
             config['epochs'] = epochs
             config['order'] = order
-            config['merging_method'] = merging_method # normal, ties, breadcrumbs, dare, pcgrad
+            config['merging_method'] = merging_method
             print(config)
     with open(ft_conf_file, "w") as file:
         yaml.dump(config, file)
@@ -29,13 +27,13 @@ for order in range(2, desired_orders+1):
     # adjust hyperparameters in task_vectors.yaml
     with open(tv_conf_file, "r") as file:
             config = yaml.safe_load(file)
-            config['epoch_divisor'] = epoch_divisor
             config['epochs'] = epochs
             config['order'] = order
             config['task_vectors']['merging_method'] = merging_method
             print(config)
     with open(tv_conf_file, "w") as file:
         yaml.dump(config, file)
+    
     
 
     # datasets = ["cifar100", "dtd", "eurosat", "gtsrb", "mnist", "resisc45", "svhn"]

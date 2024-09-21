@@ -168,7 +168,7 @@ def run(cfg: DictConfig):
 
 
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_pcgrad_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
     model_class = get_class(text_encoder)
     
