@@ -12,7 +12,7 @@ yaml_file = "conf/nn/data/default.yaml"
 ft_conf_file = "conf/finetune.yaml"
 tv_conf_file = "conf/task_vectors.yaml"
 
-for order in range(2, desired_orders+1):
+for order in range(1, desired_orders+1):
 
     # adjust hyperparameters in finetune.yaml
     with open(ft_conf_file, "r") as file:
@@ -20,6 +20,7 @@ for order in range(2, desired_orders+1):
             config['epochs'] = epochs
             config['order'] = order
             config['merging_method'] = merging_method
+            config['ft_on_data_split'] = "train" if order == 1 else "val"
             print(config)
     with open(ft_conf_file, "w") as file:
         yaml.dump(config, file)
