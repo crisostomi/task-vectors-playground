@@ -1,15 +1,15 @@
 
 defaults:
   - _self_
-  # - model: vit
+  - model: vit
   #- model: roberta
-  - model: bert
+  # - model: bert
 
 # _target_: tvp.pl_module.image_classifier.ImageClassifier
 _target_: tvp.pl_module.text_classifier.TextClassifier
 x_key: ${conventions.x_key}
 y_key: ${conventions.y_key}
-attn_mask_key: ${conventions.attn_mask_key}
+# attn_mask_key: ${conventions.attn_mask_key} # put this in bert.yml
 encoder: ??
 classifier: ??
 

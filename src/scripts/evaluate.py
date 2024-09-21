@@ -37,11 +37,11 @@ import hydra
 from hydra import initialize, compose
 from typing import Dict, List
 
-from competitors.my_ties import ties_merging
-from competitors.my_breadcrumbs import model_breadcrumbs
-from competitors.their_ties import *
-from competitors.my_dare import *
-from my_pcgrad import *
+from src.scripts.competitors.my_ties import ties_merging
+from src.scripts.competitors.my_breadcrumbs import model_breadcrumbs
+from src.scripts.competitors.their_ties import *
+from src.scripts.competitors.my_dare import *
+from src.scripts.my_pcgrad import *
 
 
 pylogger = logging.getLogger(__name__)
