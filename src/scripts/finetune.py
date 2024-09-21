@@ -83,7 +83,7 @@ def run(cfg: DictConfig):
         zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" 
     else:
         #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
-        eroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0"  
+        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0"  
 
 
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
@@ -154,8 +154,15 @@ def run(cfg: DictConfig):
         **cfg.train.trainer,
     )
 
-    pylogger.info("Starting training!")
-    trainer.fit(model=model, train_dataloaders=dataset.train_loader, ckpt_path=template_core.trainer_ckpt_path)
+    pylogger.info(f"Starting fine-tuning on {cfg.ft_on_data_split} data split!")
+    if cfg.ft_on_data_split == "train":
+        ft_dataloader = dataset.train_loader
+    elif cfg.ft_on_data_split == "val":
+        ft_dataloader = dataset.val_loader
+    else:
+        raise ValueError(f"Unknown data split to fine-tune on: {cfg.ft_on_data_split}. Possible values: \"train\" or \"val\"")
+    
+    trainer.fit(model=model, train_dataloaders=ft_dataloader, ckpt_path=template_core.trainer_ckpt_path)
 
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)

@@ -15,6 +15,8 @@ defaults:
 - _self_
 epoch_divisor: None
 epochs: 1
+ft_on_data_split: train
+merging_method: pcgrad
 misc:
   cache_dir: null
   ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}
@@ -25,4 +27,3 @@ order: 1
 reset_classification_head: true
 reset_pretrained_model: false
 seed_index: 0
-merging_method: pcgrad
