@@ -42,6 +42,17 @@ class MNLI:
             collate_fn=self.collator_fn
         )
 
+        
+        self.val_dataset = val_dataset
+        
+        self.val_loader = DataLoader(
+            self.val_dataset,
+            shuffle=True,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            collate_fn=self.collator_fn
+        )
+
 
         self.test_dataset = test_dataset
 
