@@ -5,7 +5,6 @@ conventions:
 core:
   entity: dansolombrinoandfriends
   project_name: higher-order-task-arithmetics
-  project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
   tags:
   - finetune
@@ -18,7 +17,7 @@ defaults:
 epoch_divisor: None
 epochs: 1
 ft_on_data_split: train
-merging_method: pcgrad
+merging_method: normal
 misc:
   cache_dir: null
   ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}

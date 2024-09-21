@@ -156,10 +156,18 @@ def run(cfg: DictConfig):
         **cfg.train.trainer,
     )
 
+    pylogger.info(f"Starting fine-tuning on {cfg.ft_on_data_split} data split!")
+    if cfg.ft_on_data_split == "train":
+        ft_dataloader = dataset.train_loader
+    elif cfg.ft_on_data_split == "val":
+        ft_dataloader = dataset.val_loader
+    else:
+        raise ValueError(f"Unknown data split to fine-tune on: {cfg.ft_on_data_split}. Possible values: \"train\" or \"val\"")
+
     pylogger.info("Starting training!")
     trainer.fit(
         model=model, 
-        train_dataloaders=dataset.train_loader, 
+        train_dataloaders=ft_dataloader, 
         ckpt_path=template_core.trainer_ckpt_path
     )
 
@@ -168,7 +176,7 @@ def run(cfg: DictConfig):
 
 
     #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_pcgrad_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
+    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
 
     model_class = get_class(text_encoder)
     
