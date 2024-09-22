@@ -150,7 +150,8 @@ def run(cfg: DictConfig):
     trainer = pl.Trainer(
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
-        max_epochs=cfg.epochs, 
+        # max_epochs=cfg.epochs, 
+        max_epochs=cfg.nn.data.dataset.ft_epochs if cfg.order == 1 else cfg.epochs, 
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
