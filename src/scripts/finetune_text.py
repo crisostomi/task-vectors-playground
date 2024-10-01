@@ -128,7 +128,8 @@ def run(cfg: DictConfig):
     model: TextClassifier = hydra.utils.instantiate(
         cfg.nn.module, 
         encoder=text_encoder, classifier=classification_head, 
-        _recursive_=False
+        _recursive_=False,
+        save_grad_norms=cfg.train.save_grad_norms
     )
 
     dataset = get_text_dataset(
@@ -151,7 +152,7 @@ def run(cfg: DictConfig):
         default_root_dir=storage_dir,
         plugins=[NNCheckpointIO(jailing_dir=logger.run_dir)],
         # max_epochs=cfg.epochs, 
-        max_epochs=cfg.nn.data.dataset.ft_epochs if cfg.order == 1 else cfg.epochs, 
+        max_epochs=cfg.nn.data.dataset.ft_epochs,
         logger=logger,
         callbacks=callbacks,
         **cfg.train.trainer,
@@ -186,7 +187,7 @@ def run(cfg: DictConfig):
         "model_class": model_class
     }
 
-    upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
+    # upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
 
     
     if logger is not None:

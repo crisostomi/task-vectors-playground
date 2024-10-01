@@ -4,9 +4,9 @@ from rich import print
 import yaml
 import subprocess
 
-epochs = 1
-desired_orders = 10
-merging_method = "pcgrad"
+epochs = -6969
+desired_orders = 1
+merging_method = "normal"
 
 yaml_file = "conf/nn/data/default.yaml"
 ft_conf_file = "conf/finetune.yaml"
@@ -20,7 +20,7 @@ for order in range(1, desired_orders+1):
             config['epochs'] = epochs
             config['order'] = order
             config['merging_method'] = merging_method
-            config['ft_on_data_split'] = "train" if order == 1 else "val"
+            config['ft_on_data_split'] = "train"
             print(config)
     with open(ft_conf_file, "w") as file:
         yaml.dump(config, file)
@@ -38,7 +38,9 @@ for order in range(1, desired_orders+1):
     
 
     # datasets = ["cifar100", "dtd", "eurosat", "gtsrb", "mnist", "resisc45", "svhn"]
-    datasets = ["cola", "sst2", "mrpc", "qqp", "mnli", "qnli", "rte"]
+    # datasets = ["cola", "sst2", "mrpc", "qqp", "mnli", "qnli", "rte"]
+    # datasets = ["rte", "mrpc", "cola", "sst2", "qnli", "qqp", "mnli"]
+    datasets = ["sst2", "qnli", "qqp", "mnli"]
     #datasets = []
     for dataset_id, dataset in enumerate(datasets): # modify the dataset hyperparameter in config
 
@@ -54,5 +56,5 @@ for order in range(1, desired_orders+1):
 
         subprocess.run(["python", "src/scripts/finetune_text.py"], check=True)
 
-    subprocess.run(["python", "src/scripts/evaluate_text.py"], check=True)
+    # subprocess.run(["python", "src/scripts/evaluate_text.py"], check=True)
     
