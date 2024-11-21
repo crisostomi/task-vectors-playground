@@ -20,11 +20,14 @@ def build_classification_head(model, dataset_name, template, data_location, devi
     print("Building classification head.")
     with torch.no_grad():
         zeroshot_weights = []
+
         for classname in tqdm(dataset.classnames):
+            # get templates for the class
             texts = []
             for t in template:
                 texts.append(t(classname))
             texts = open_clip.tokenize(texts).to(device)  # tokenize
+
             embeddings = model.encode_text(texts)  # embed with text encoder
 
             if type(embeddings) is tuple:

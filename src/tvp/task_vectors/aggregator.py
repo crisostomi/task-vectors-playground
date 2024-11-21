@@ -2,12 +2,14 @@ import copy
 from typing import List
 
 import torch
+from torch.nn.utils import parameters_to_vector, vector_to_parameters
+
 from tvp.task_vectors.aggregation import slerp, spherical_weighted_average
+from tvp.task_vectors.task_singular_vectors import compute_and_sum_svd_mem_reduction
 
 
 class Aggregator:
-
-    def __init__(self):
+    def __init__(self, **kwargs):
         pass
 
     def __call__(self, task_vectors):
@@ -18,12 +20,10 @@ class Aggregator:
 
 
 class SphericalAggregator(Aggregator):
-
-    def __init__(self):
-        super(SphericalAggregator, self).__init__()
+    def __init__(self, **kwargs):
+        super(SphericalAggregator, self).__init__(**kwargs)
 
     def aggregate(self, task_vectors, weights=None):
-
         if isinstance(task_vectors, List):
             task_vectors = torch.stack(task_vectors)
 
@@ -38,12 +38,10 @@ class SphericalAggregator(Aggregator):
 
 
 class SlerpAggregator(Aggregator):
-
-    def __init__(self):
-        super(SlerpAggregator, self).__init__()
+    def __init__(self, **kwargs):
+        super(SlerpAggregator, self).__init__(**kwargs)
 
     def aggregate(self, task_vectors, weight=0.5):
-
         assert len(task_vectors) == 2
 
         multi_task_vector = slerp(0.5, task_vectors[0], task_vectors[1]).cpu()
@@ -52,9 +50,8 @@ class SlerpAggregator(Aggregator):
 
 
 class SumAggregator(Aggregator):
-
-    def __init__(self, mean=False, rescaling=1.0):
-        super(SumAggregator, self).__init__()
+    def __init__(self, mean=False, rescaling=1.0, **kwargs):
+        super(SumAggregator, self).__init__(**kwargs)
 
         self.mean = mean
         self.rescaling = rescaling
@@ -69,3 +66,30 @@ class SumAggregator(Aggregator):
             multi_task_vector /= len(task_vectors)
 
         return multi_task_vector * self.rescaling
+
+
+class TaskSingularVectorAggregator(Aggregator):
+    def __init__(self, zeroshot_model):
+        super().__init__()
+
+        self.zeroshot_model = zeroshot_model
+
+    def aggregate(self, task_vectors):
+        if isinstance(task_vectors, torch.Tensor):
+            task_vectors = list(task_vectors)
+
+        delta_models = []
+        for task_vector in task_vectors:
+            delta_model = copy.deepcopy(self.zeroshot_model)
+            vector_to_parameters(task_vector, delta_model.parameters())
+
+            delta_models.append(delta_model)
+
+        delta_aggregated_state_dict = compute_and_sum_svd_mem_reduction(delta_models)
+
+        delta_model = copy.deepcopy(self.zeroshot_model)
+        delta_model.load_state_dict(delta_aggregated_state_dict)
+
+        delta_aggregated_vector = parameters_to_vector(delta_model.parameters())
+
+        return delta_aggregated_vector

@@ -1,15 +1,18 @@
 ## Imports
+import copy
 import logging
 import os
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import hydra
 import omegaconf
 import pytorch_lightning as pl
 import torch
+from hydra import compose, initialize
+from hydra.utils import instantiate
 from lightning.pytorch import Callback
 from omegaconf import DictConfig, ListConfig
-import copy
+from torch.nn.utils import parameters_to_vector, vector_to_parameters
 
 from nn_core.callbacks import NNTemplateCore
 from nn_core.common import PROJECT_ROOT
@@ -24,12 +27,6 @@ from tvp.data.datasets.registry import get_dataset
 from tvp.task_vectors.task_vectors import TaskVector
 from tvp.utils.io_utils import load_model_from_artifact
 from tvp.utils.utils import build_callbacks
-from torch.nn.utils import vector_to_parameters
-from torch.nn.utils import parameters_to_vector
-from hydra.utils import instantiate
-import hydra
-from hydra import initialize, compose
-from typing import Dict, List
 
 pylogger = logging.getLogger(__name__)
 
@@ -84,7 +81,7 @@ def run(cfg: DictConfig) -> str:
             [flatten(finetuned_models[dataset]) - zeroshot_vec for dataset in cfg.task_vectors.to_apply]
         )
 
-    task_vector_aggregator = instantiate(cfg.task_vectors.aggregator)
+    task_vector_aggregator = instantiate(cfg.task_vectors.aggregator, zeroshot_model=zeroshot_model)
     multi_task_vector = task_vector_aggregator(task_vectors)
 
     delta_model = copy.deepcopy(zeroshot_model)
@@ -97,7 +94,6 @@ def run(cfg: DictConfig) -> str:
     results = {}
 
     for dataset_name in cfg.eval_datasets:
-
         classification_head_identifier = f"{cfg.nn.module.model.model_name}_{dataset_name}_head"
         classification_head = load_model_from_artifact(
             artifact_path=f"{classification_head_identifier}:latest", run=logger.experiment

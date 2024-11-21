@@ -1,7 +1,7 @@
 core:
   project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
-  entity: gladia
+  entity: dansolombrinoandfriends
   version: 0.0.1
   tags:
     - dev
@@ -40,13 +40,16 @@ task_vectors:
     - RESISC45
     - SVHN
 
-  scaling_coefficient: 1 #0.8
+  scaling_coefficient: 0.3 #0.8
 
   aggregator:
     # _target_: tvp.task_vectors.aggregator.SphericalAggregator
     _target_: tvp.task_vectors.aggregator.SumAggregator
-    mean: true
+    mean: false
+    rescaling: 0.3
 
+    # _target_: tvp.task_vectors.aggregator.TaskSingularVectorAggregator
+    # zeroshot_model: ???
 
 misc:
   ckpt_path: ${oc.env:PROJECT_ROOT}/checkpoints/${nn.module.model.model_name}

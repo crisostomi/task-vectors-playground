@@ -1,0 +1,626 @@
+{
+    "model.positional_embedding": {
+        "u_shape": [
+            77,
+            77
+        ],
+        "error_u": 9.90395450592041,
+        "v_shape": [
+            77,
+            512
+        ],
+        "error_v": 9.90395450592041
+    },
+    "model.visual.positional_embedding": {
+        "u_shape": [
+            50,
+            50
+        ],
+        "error_u": 3.9171535968780518,
+        "v_shape": [
+            50,
+            768
+        ],
+        "error_v": 3.0064945220947266
+    },
+    "model.visual.proj": {
+        "u_shape": [
+            768,
+            512
+        ],
+        "error_u": 11.075615882873535,
+        "v_shape": [
+            512,
+            512
+        ],
+        "error_v": 13.65758991241455
+    },
+    "model.visual.transformer.resblocks.0.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 14.662909507751465,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 21.633094787597656
+    },
+    "model.visual.transformer.resblocks.0.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.172481536865234,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 18.233657836914062
+    },
+    "model.visual.transformer.resblocks.0.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 12.498422622680664,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 22.09100341796875
+    },
+    "model.visual.transformer.resblocks.0.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.9233341217041,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 16.894094467163086
+    },
+    "model.visual.transformer.resblocks.1.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 14.42800521850586,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 19.400094985961914
+    },
+    "model.visual.transformer.resblocks.1.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.943634033203125,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 18.19367790222168
+    },
+    "model.visual.transformer.resblocks.1.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 11.858851432800293,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.236181259155273
+    },
+    "model.visual.transformer.resblocks.1.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 20.509416580200195,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 12.508832931518555
+    },
+    "model.visual.transformer.resblocks.2.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 15.108112335205078,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.35932159423828
+    },
+    "model.visual.transformer.resblocks.2.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 18.92010498046875,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 18.985870361328125
+    },
+    "model.visual.transformer.resblocks.2.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 12.5133695602417,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.10586929321289
+    },
+    "model.visual.transformer.resblocks.2.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 18.844173431396484,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 15.592556953430176
+    },
+    "model.visual.transformer.resblocks.3.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 14.126683235168457,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.65584945678711
+    },
+    "model.visual.transformer.resblocks.3.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 18.294422149658203,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 19.419906616210938
+    },
+    "model.visual.transformer.resblocks.3.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 11.570698738098145,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.182016372680664
+    },
+    "model.visual.transformer.resblocks.3.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 18.89064598083496,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 15.602356910705566
+    },
+    "model.visual.transformer.resblocks.4.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 13.414215087890625,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.314739227294922
+    },
+    "model.visual.transformer.resblocks.4.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.986743927001953,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 18.911699295043945
+    },
+    "model.visual.transformer.resblocks.4.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 10.497602462768555,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.400188446044922
+    },
+    "model.visual.transformer.resblocks.4.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 18.236671447753906,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 15.541877746582031
+    },
+    "model.visual.transformer.resblocks.5.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 12.417701721191406,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 19.84430503845215
+    },
+    "model.visual.transformer.resblocks.5.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.52743911743164,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 19.448646545410156
+    },
+    "model.visual.transformer.resblocks.5.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 9.247672080993652,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 20.026262283325195
+    },
+    "model.visual.transformer.resblocks.5.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.89156150817871,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 14.012306213378906
+    },
+    "model.visual.transformer.resblocks.6.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 11.711771965026855,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 18.87537384033203
+    },
+    "model.visual.transformer.resblocks.6.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.912551879882812,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 18.867116928100586
+    },
+    "model.visual.transformer.resblocks.6.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 8.75656509399414,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 19.323827743530273
+    },
+    "model.visual.transformer.resblocks.6.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.455392837524414,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 12.442571640014648
+    },
+    "model.visual.transformer.resblocks.7.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 11.411040306091309,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.878616333007812
+    },
+    "model.visual.transformer.resblocks.7.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.795547485351562,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.9973201751709
+    },
+    "model.visual.transformer.resblocks.7.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 8.18100643157959,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 18.274566650390625
+    },
+    "model.visual.transformer.resblocks.7.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.111900329589844,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 11.273385047912598
+    },
+    "model.visual.transformer.resblocks.8.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 10.5057373046875,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.30202865600586
+    },
+    "model.visual.transformer.resblocks.8.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.402538299560547,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.884532928466797
+    },
+    "model.visual.transformer.resblocks.8.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 7.462715148925781,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.85015296936035
+    },
+    "model.visual.transformer.resblocks.8.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.88714599609375,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 9.510518074035645
+    },
+    "model.visual.transformer.resblocks.9.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 10.178740501403809,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 16.804834365844727
+    },
+    "model.visual.transformer.resblocks.9.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.339441299438477,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.282358169555664
+    },
+    "model.visual.transformer.resblocks.9.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 7.143294811248779,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.171846389770508
+    },
+    "model.visual.transformer.resblocks.9.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.93170166015625,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 8.54470157623291
+    },
+    "model.visual.transformer.resblocks.10.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 10.11062240600586,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 16.447172164916992
+    },
+    "model.visual.transformer.resblocks.10.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.498476028442383,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.092195510864258
+    },
+    "model.visual.transformer.resblocks.10.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 7.226667404174805,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 16.772504806518555
+    },
+    "model.visual.transformer.resblocks.10.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 17.36610984802246,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 8.258709907531738
+    },
+    "model.visual.transformer.resblocks.11.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            768
+        ],
+        "error_u": 10.422605514526367,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 16.115020751953125
+    },
+    "model.visual.transformer.resblocks.11.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 16.971975326538086,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.190654754638672
+    },
+    "model.visual.transformer.resblocks.11.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            768
+        ],
+        "error_u": 8.270206451416016,
+        "v_shape": [
+            768,
+            768
+        ],
+        "error_v": 17.205106735229492
+    },
+    "model.visual.transformer.resblocks.11.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            768
+        ],
+        "error_u": 18.41141128540039,
+        "v_shape": [
+            768,
+            3072
+        ],
+        "error_v": 10.8651762008667
+    },
+    "model.token_embedding.weight": {
+        "u_shape": [
+            49408,
+            512
+        ],
+        "error_u": 25.72861099243164,
+        "v_shape": [
+            512,
+            512
+        ],
+        "error_v": 25.728609085083008
+    }
+}

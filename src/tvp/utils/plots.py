@@ -5,21 +5,12 @@ import numpy as np
 
 
 class Palette(dict):
-    def __init__(self, path):
-
-        with open(path, "r") as f:
+    def __init__(self, palette_path, map_path):
+        with open(palette_path, "r") as f:
             color_palette = json.load(f)
 
-        mapping = {
-            "Bittersweet shimmer": "light red",
-            "Persian green": "green",
-            "Saffron": "yellow",
-            "Charcoal": "dark blue",
-            "Burgundy": "red",
-            "Burnt sienna": "orange",
-            "Eggplant": "violet",
-            "Sandy brown": "light orange",
-        }
+        with open(map_path, "r") as f:
+            mapping = json.load(f)
 
         for color, hex_code in color_palette.items():
             self[mapping[color]] = hex_code

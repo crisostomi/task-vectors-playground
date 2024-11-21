@@ -1,0 +1,626 @@
+{
+    "model.positional_embedding": {
+        "u_shape": [
+            77,
+            616
+        ],
+        "error_u": 16.044384002685547,
+        "v_shape": [
+            616,
+            512
+        ],
+        "error_v": 26.31391716003418
+    },
+    "model.visual.positional_embedding": {
+        "u_shape": [
+            50,
+            400
+        ],
+        "error_u": 12.928991317749023,
+        "v_shape": [
+            400,
+            768
+        ],
+        "error_v": 9.158794403076172
+    },
+    "model.visual.proj": {
+        "u_shape": [
+            768,
+            4096
+        ],
+        "error_u": 37.05996322631836,
+        "v_shape": [
+            4096,
+            512
+        ],
+        "error_v": 41.3814697265625
+    },
+    "model.visual.transformer.resblocks.0.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 42.40381622314453,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68096160888672
+    },
+    "model.visual.transformer.resblocks.0.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.660240173339844,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68149948120117
+    },
+    "model.visual.transformer.resblocks.0.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 42.99383544921875,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68083190917969
+    },
+    "model.visual.transformer.resblocks.0.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.68081283569336,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 45.895145416259766
+    },
+    "model.visual.transformer.resblocks.1.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 40.782745361328125,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68082046508789
+    },
+    "model.visual.transformer.resblocks.1.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.660240173339844,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68147277832031
+    },
+    "model.visual.transformer.resblocks.1.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 36.48870086669922,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68065643310547
+    },
+    "model.visual.transformer.resblocks.1.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.68068313598633,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 37.855655670166016
+    },
+    "model.visual.transformer.resblocks.2.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 41.78488540649414,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68089294433594
+    },
+    "model.visual.transformer.resblocks.2.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.66024398803711,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.681396484375
+    },
+    "model.visual.transformer.resblocks.2.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 36.43147659301758,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68083953857422
+    },
+    "model.visual.transformer.resblocks.2.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.680908203125,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 39.105445861816406
+    },
+    "model.visual.transformer.resblocks.3.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 40.23486328125,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68082046508789
+    },
+    "model.visual.transformer.resblocks.3.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.660308837890625,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68155288696289
+    },
+    "model.visual.transformer.resblocks.3.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 35.936973571777344,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.680694580078125
+    },
+    "model.visual.transformer.resblocks.3.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.680870056152344,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 38.88401794433594
+    },
+    "model.visual.transformer.resblocks.4.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 39.34270095825195,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68073272705078
+    },
+    "model.visual.transformer.resblocks.4.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.66025924682617,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.681461334228516
+    },
+    "model.visual.transformer.resblocks.4.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 35.18867874145508,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68069839477539
+    },
+    "model.visual.transformer.resblocks.4.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.681026458740234,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 38.59489822387695
+    },
+    "model.visual.transformer.resblocks.5.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 38.00478744506836,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68085861206055
+    },
+    "model.visual.transformer.resblocks.5.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.66020584106445,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.681236267089844
+    },
+    "model.visual.transformer.resblocks.5.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 34.108402252197266,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68084716796875
+    },
+    "model.visual.transformer.resblocks.5.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.68093490600586,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 37.30406188964844
+    },
+    "model.visual.transformer.resblocks.6.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 37.560306549072266,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68083190917969
+    },
+    "model.visual.transformer.resblocks.6.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.660186767578125,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.681758880615234
+    },
+    "model.visual.transformer.resblocks.6.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 33.514739990234375,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68064880371094
+    },
+    "model.visual.transformer.resblocks.6.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.68100357055664,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 36.02950668334961
+    },
+    "model.visual.transformer.resblocks.7.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 37.145538330078125,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68088912963867
+    },
+    "model.visual.transformer.resblocks.7.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.66019058227539,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68144607543945
+    },
+    "model.visual.transformer.resblocks.7.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 32.906673431396484,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68080139160156
+    },
+    "model.visual.transformer.resblocks.7.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.6810417175293,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 35.00545120239258
+    },
+    "model.visual.transformer.resblocks.8.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 36.372398376464844,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68107986450195
+    },
+    "model.visual.transformer.resblocks.8.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.6602897644043,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68125915527344
+    },
+    "model.visual.transformer.resblocks.8.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 32.133460998535156,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68093490600586
+    },
+    "model.visual.transformer.resblocks.8.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.68087387084961,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 33.61286544799805
+    },
+    "model.visual.transformer.resblocks.9.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 36.11537170410156,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68105697631836
+    },
+    "model.visual.transformer.resblocks.9.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.66025161743164,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68130874633789
+    },
+    "model.visual.transformer.resblocks.9.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 31.835763931274414,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68094253540039
+    },
+    "model.visual.transformer.resblocks.9.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.680999755859375,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 33.17871856689453
+    },
+    "model.visual.transformer.resblocks.10.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 36.01211929321289,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.681053161621094
+    },
+    "model.visual.transformer.resblocks.10.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.660221099853516,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.681522369384766
+    },
+    "model.visual.transformer.resblocks.10.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 31.820280075073242,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68084716796875
+    },
+    "model.visual.transformer.resblocks.10.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.681278228759766,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 33.1986198425293
+    },
+    "model.visual.transformer.resblocks.11.attn.in_proj_weight": {
+        "u_shape": [
+            2304,
+            6144
+        ],
+        "error_u": 35.92123031616211,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68102264404297
+    },
+    "model.visual.transformer.resblocks.11.attn.out_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.66011047363281,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.68159866333008
+    },
+    "model.visual.transformer.resblocks.11.mlp.c_fc.weight": {
+        "u_shape": [
+            3072,
+            6144
+        ],
+        "error_u": 32.72698974609375,
+        "v_shape": [
+            6144,
+            768
+        ],
+        "error_v": 50.681251525878906
+    },
+    "model.visual.transformer.resblocks.11.mlp.c_proj.weight": {
+        "u_shape": [
+            768,
+            6144
+        ],
+        "error_u": 50.681419372558594,
+        "v_shape": [
+            6144,
+            3072
+        ],
+        "error_v": 40.89110565185547
+    },
+    "model.token_embedding.weight": {
+        "u_shape": [
+            49408,
+            4096
+        ],
+        "error_u": 72.77149963378906,
+        "v_shape": [
+            4096,
+            512
+        ],
+        "error_v": 41.37258529663086
+    }
+}
