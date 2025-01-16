@@ -1,11 +1,8 @@
 
 defaults:
   - _self_
-  # - model: vit
-  #- model: roberta
-  - model: bert
+  - model: clip_text_encoder
 
-# _target_: tvp.pl_module.image_classifier.ImageClassifier
 _target_: tvp.pl_module.text_classifier.TextClassifier
 x_key: ${conventions.x_key}
 y_key: ${conventions.y_key}

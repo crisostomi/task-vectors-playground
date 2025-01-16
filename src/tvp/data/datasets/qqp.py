@@ -1,9 +1,12 @@
 from tvp.data.datasets.glue_data_loader import GLUEDataLoader
 from transformers import AutoTokenizer, BioGptTokenizer
+from open_clip.tokenizer import SimpleTokenizer as ClipTokenizer
 
 from torch.utils.data import DataLoader
 
 from transformers.data.data_collator import DataCollatorWithPadding
+from tvp.data.datasets.glue_data_loader import clip_collate_fn
+
 
 DATASET_NAME = "qqp"
 
@@ -18,20 +21,23 @@ class QQP:
     ):
         glue_data_loader = GLUEDataLoader(tokenizer=tokenizer)
 
+        if isinstance(tokenizer, ClipTokenizer):
+            collate_fn = clip_collate_fn
+        else:
+            collate_fn = DataCollatorWithPadding(
+                tokenizer=tokenizer,
+                padding="longest",
+                max_length=max_seq_length,
+                return_tensors="pt",
+                collate_fn=collate_fn
+        )
+
         train_dataset, val_dataset, test_dataset, num_labels = glue_data_loader.load_dataset(
             dataset_name=DATASET_NAME,
             train_split_ratio_for_val=train_split_ratio_for_val,
             max_seq_length=max_seq_length
         )
 
-        self.collator_fn = DataCollatorWithPadding(
-            tokenizer=tokenizer,
-            padding="longest",
-            max_length=max_seq_length,
-            return_tensors="pt"
-        )
-
-        
         self.train_dataset = train_dataset
         
         self.train_loader = DataLoader(
@@ -39,9 +45,8 @@ class QQP:
             shuffle=True,
             batch_size=batch_size,
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )
-        
         
         self.val_dataset = val_dataset
         
@@ -50,7 +55,7 @@ class QQP:
             shuffle=True,
             batch_size=batch_size,
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )
 
 
@@ -61,5 +66,5 @@ class QQP:
             shuffle=False,
             batch_size=batch_size, 
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )

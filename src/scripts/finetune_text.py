@@ -54,48 +54,25 @@ num_to_th = {
 
 def run(cfg: DictConfig):
     
-    
     seed_index_everything(cfg)
 
-    
     template_core: NNTemplateCore = NNTemplateCore(
         restore_cfg=cfg.train.get("restore", None),
     )
-
 
     logger: NNLogger = NNLogger(
         logging_cfg=cfg.train.logging, 
         cfg=cfg, 
         resume_id=template_core.resume_id
     )
-
     
-    if cfg.order == 1:
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_pt" 
-    else:
-        #zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
-        zeroshot_identifier = f"{cfg.nn.module.model.model_name}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order - 1}{num_to_th[cfg.order - 1]}OrderUnifiedModel_0" 
-
-
     classification_head_identifier = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_head"
-
     
-    if cfg.reset_pretrained_model:
-        text_encoder: TextEncoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
+    text_encoder: TextEncoder = hydra.utils.instantiate(cfg.nn.module.model, keep_lang=False)
         
-        model_class = get_class(text_encoder)
-        metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class}
-        
-        upload_model_to_wandb(
-            text_encoder, zeroshot_identifier, logger.experiment, cfg, metadata
-        )
-
-    else:
-        text_encoder = load_model_from_artifact(
-            artifact_path=f"{zeroshot_identifier}:latest", 
-            run=logger.experiment
-        )
-
+    model_class = get_class(text_encoder)
+    metadata = {"model_name": cfg.nn.module.model.model_name, "model_class": model_class}
+    
     if cfg.reset_classification_head:
         classification_head = get_classification_head(
             input_size=cfg.nn.module.model.hidden_size,
@@ -110,14 +87,6 @@ def run(cfg: DictConfig):
             "num_classes": cfg.nn.data.dataset.num_classes,
             "input_size": cfg.nn.module.model.hidden_size,
         }
-
-        upload_model_to_wandb(
-            classification_head, 
-            classification_head_identifier, 
-            logger.experiment, 
-            cfg, 
-            metadata=metadata
-        )
 
     else:
         classification_head = load_model_from_artifact(
@@ -176,10 +145,6 @@ def run(cfg: DictConfig):
     pylogger.info("Starting testing!")
     trainer.test(model=model, dataloaders=dataset.test_loader)
 
-
-    #artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
-    artifact_name = f"{cfg.nn.module.model.model_name}_{cfg.nn.data.dataset.dataset_name}_{cfg.seed_index}_{cfg.merging_method}_{cfg.epochs}Eps{cfg.order}{num_to_th[cfg.order]}Order"
-
     model_class = get_class(text_encoder)
     
     metadata = {
@@ -187,44 +152,15 @@ def run(cfg: DictConfig):
         "model_class": model_class
     }
 
-    # upload_model_to_wandb(model.encoder, artifact_name, logger.experiment, cfg, metadata)
-
-    
     if logger is not None:
         logger.experiment.finish()
+    
+    encoder_ckpt = os.path.join(storage_dir, "encoder.pt")
+    torch.save(model.encoder.state_dict(), encoder_ckpt)
 
+    head_ckpt = os.path.join(storage_dir, "head.pt")
+    torch.save(model.classification_head.state_dict(), head_ckpt)
 
-def upload_model_to_wandb(
-    model: Union[LightningModule, nn.Module], artifact_name, run, cfg: DictConfig, metadata: Dict
-):
-    model = model.cpu()
-
-    pylogger.info(f"Uploading artifact {artifact_name}")
-
-    model_artifact = wandb.Artifact(name=artifact_name, type="checkpoint", metadata=metadata)
-
-    temp_path = "temp_checkpoint.ckpt"
-
-    if isinstance(model, LightningModule):
-        trainer = pl.Trainer(
-            plugins=[NNCheckpointIO(jailing_dir="./tmp")],
-        )
-
-        trainer.strategy.connect(model)
-        trainer.save_checkpoint(temp_path)
-
-        model_artifact.add_file(temp_path + ".zip", name="trained.ckpt.zip")
-        path_to_remove = temp_path + ".zip"
-
-    else:
-        torch.save(model.state_dict(), temp_path)
-
-        model_artifact.add_file(temp_path, name="trained.ckpt")
-        path_to_remove = temp_path
-
-    run.log_artifact(model_artifact)
-
-    os.remove(path_to_remove)
 
 
 @hydra.main(config_path=str(PROJECT_ROOT / "conf"), config_name="finetune.yaml")

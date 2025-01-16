@@ -3,6 +3,9 @@ import numpy as np
 from torch.utils.data import Subset, Dataset
 from datasets import load_dataset
 import transformers
+from open_clip.tokenizer import SimpleTokenizer
+import numpy as np
+import torch
 
 glue_data_keys_map = {
     "cola": ("sentence", None),
@@ -78,21 +81,29 @@ class GLUEDataLoader:
         :return:
         """
         dataset = load_dataset(path="glue", name=dataset_name, cache_dir=cache_dir)
-        # dataset = load_dataset(path=os.path.join(cache_dir, "glue"), name=dataset_name)
 
         # get the key of datasets
         sentence1_key, sentence2_key = glue_data_keys_map[dataset_name]
 
-        # set batched to True to process all examples together, will have keys like "input_ids", "attention_mask"
-        dataset = dataset.map(
-            lambda examples: self.tokenizer(
-                text=examples[sentence1_key],
-                text_pair=examples[sentence2_key] if sentence2_key else None,
-                max_length=max_seq_length, 
-                truncation=True
-            ),
-            batched=True
-        )
+        if isinstance(self.tokenizer, SimpleTokenizer):
+            dataset = dataset.map(
+                lambda examples: openclip_preprocess(
+                    examples=examples, tokenizer=self.tokenizer, sentence1_key=sentence1_key, sentence2_key=sentence2_key,
+                    max_seq_length=77
+                ),
+                batched=True
+            )
+        else:
+            dataset = dataset.map(
+                lambda examples: self.tokenizer(
+                    text=examples[sentence1_key],
+                    text_pair=examples[sentence2_key] if sentence2_key else None,
+                    max_length=max_seq_length, 
+                    truncation=True
+                ),
+                batched=True
+            )
+        
         # add the "dataset_ids" column for each example
         dataset = dataset.map(lambda x: {"dataset_ids": glue_data_id_map[dataset_name]})
 
@@ -158,3 +169,79 @@ class MultiDatasets(Dataset):
 
     def __len__(self):
         return sum([len(dataset) for dataset in self.datasets])
+
+
+def openclip_preprocess(examples, tokenizer, sentence1_key, sentence2_key, max_seq_length=128):
+    """
+    examples: dict of lists (batch from HF 'map')
+    tokenizer: instance of SimpleTokenizer()
+    sentence1_key: str for the first text field (e.g. "sentence1")
+    sentence2_key: str for the second text field if relevant (e.g. "sentence2")
+    max_seq_length: int
+    """
+    # These will store the tokenized results for the entire batch
+    all_input_ids = []
+    all_attention_masks = []
+
+    # If the dataset doesn’t have a second sentence, sentence2_key will be None
+    texts1 = examples[sentence1_key]
+    texts2 = examples[sentence2_key] if sentence2_key else [None]*len(texts1)
+
+    for text1, text2 in zip(texts1, texts2):
+        # Construct the actual text we want to tokenize
+        # If text2 is not None, combine them in some way.
+        # Here, we'll simply do something naive like "text1 [SEP] text2"
+        # because SimpleTokenizer doesn't have a built-in `text_pair` concept
+        if text2 is not None:
+            combined_text = text1 + " [SEP] " + text2
+        else:
+            combined_text = text1
+
+        # Encode (a list of token IDs)
+        token_ids = tokenizer.encode(combined_text)
+
+        # Insert special tokens if needed (start_of_text, end_of_text)
+        # The open_clip.tokenizer.tokenize(...) function does this automatically,
+        # but if you're calling tokenizer.encode(...) directly, you might do:
+        #   token_ids = [sot_token] + token_ids + [eot_token]
+        # For now, let's skip that or rely on the existing logic.
+
+        # Truncate if longer than max_seq_length
+        if len(token_ids) > max_seq_length:
+            token_ids = token_ids[:max_seq_length]
+
+        # Build attention mask
+        attention_mask = [1]*len(token_ids)
+
+        # Pad if shorter than max_seq_length
+        pad_length = max_seq_length - len(token_ids)
+        if pad_length > 0:
+            token_ids = token_ids + [0]*pad_length
+            attention_mask = attention_mask + [0]*pad_length
+
+        all_input_ids.append(token_ids)
+        all_attention_masks.append(attention_mask)
+
+    return {
+        "input_ids": all_input_ids,
+        "attention_mask": all_attention_masks,
+        # The original 'label' field is automatically preserved if the dataset has it
+        # because we didn't drop it from 'examples'. If you want to pass it explicitly,
+        # you could do:
+        # "label": examples["label"]
+    }
+
+def clip_collate_fn(batch):
+    # batch is a list of individual dataset items, each of which is already a dict
+    # with 'input_ids', 'attention_mask', 'label', etc.
+    # We just want to stack them into tensors.
+
+    # Example if everything is in the same shape already:
+    input_ids = torch.stack([example["input_ids"] for example in batch])
+    attention_mask = torch.stack([example["attention_mask"] for example in batch])
+    labels = torch.stack([example["label"] for example in batch])
+    return {
+        "input_ids": input_ids,
+        "attention_mask": attention_mask,
+        "labels": labels
+    }

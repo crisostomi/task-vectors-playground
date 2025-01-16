@@ -5,7 +5,6 @@ import sys
 
 import torch
 from torch.utils.data.dataset import random_split
-
 from tvp.data.datasets.cars import Cars
 from tvp.data.datasets.cifar10 import CIFAR10
 from tvp.data.datasets.cifar100 import CIFAR100
@@ -30,6 +29,7 @@ from tvp.data.datasets.qqp import QQP
 from tvp.data.datasets.mnli import MNLI
 from tvp.data.datasets.qnli import QNLI
 from tvp.data.datasets.rte import RTE
+from open_clip.tokenizer import SimpleTokenizer
 
 registry = {name: obj for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass)}
 
@@ -146,10 +146,14 @@ def get_text_dataset(
 
     dataset_class = registry[dataset_name]
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        pretrained_model_name_or_path=tokenizer_name,
-        use_fast=True,
-    )
+    if 'ViT-B-16' in tokenizer_name:
+        tokenizer = SimpleTokenizer()
+    
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(
+            pretrained_model_name_or_path=tokenizer_name,
+            use_fast=True,
+        )
 
     dataset = dataset_class(
         tokenizer=tokenizer,
