@@ -23,7 +23,6 @@ class ClipTextEncoder(torch.nn.Module):
 
         self.pretrained_state_dict = self.get_pretrained_weights()
         self.cache_dir = cache_dir
-        self.tv_mask = None
 
         # NOTE excluding the classification head
         # TODO eval whether it should be included as well

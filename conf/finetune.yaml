@@ -8,6 +8,7 @@ core:
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
   tags:
   - finetune
+  - cmm
   version: 0.0.1
 defaults:
 - hydra: default
@@ -16,7 +17,7 @@ defaults:
 - _self_
 
 epoch_divisor: None
-epochs: 1
+epochs: 5
 ft_on_data_split: train
 merging_method: normal
 

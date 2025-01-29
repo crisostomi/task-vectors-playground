@@ -4,6 +4,9 @@ from transformers import AutoTokenizer, BioGptTokenizer
 from torch.utils.data import DataLoader
 
 from transformers.data.data_collator import DataCollatorWithPadding
+from tvp.data.datasets.glue_data_loader import clip_collate_fn
+from open_clip.tokenizer import SimpleTokenizer as ClipTokenizer
+
 
 DATASET_NAME = "rte"
 
@@ -24,11 +27,14 @@ class RTE:
             max_seq_length=max_seq_length
         )
 
-        self.collator_fn = DataCollatorWithPadding(
-            tokenizer=tokenizer,
-            padding="longest",
-            max_length=max_seq_length,
-            return_tensors="pt"
+        if isinstance(tokenizer, ClipTokenizer):
+            collate_fn = clip_collate_fn
+        else:
+            collate_fn = DataCollatorWithPadding(
+                tokenizer=tokenizer,
+                padding="longest",
+                max_length=max_seq_length,
+                return_tensors="pt",
         )
 
         
@@ -39,7 +45,7 @@ class RTE:
             shuffle=True,
             batch_size=batch_size,
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )
         
         self.val_dataset = val_dataset
@@ -49,7 +55,7 @@ class RTE:
             shuffle=True,
             batch_size=batch_size,
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )
 
 
@@ -60,5 +66,5 @@ class RTE:
             shuffle=False,
             batch_size=batch_size, 
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )

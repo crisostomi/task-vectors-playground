@@ -155,10 +155,10 @@ def run(cfg: DictConfig):
     if logger is not None:
         logger.experiment.finish()
     
-    encoder_ckpt = os.path.join(storage_dir, "encoder.pt")
+    encoder_ckpt = os.path.join(storage_dir, f"encoder_{cfg.nn.data.train_dataset}.pt")
     torch.save(model.encoder.state_dict(), encoder_ckpt)
 
-    head_ckpt = os.path.join(storage_dir, "head.pt")
+    head_ckpt = os.path.join(storage_dir, f"head_{cfg.nn.data.train_dataset}.pt")
     torch.save(model.classification_head.state_dict(), head_ckpt)
 
 

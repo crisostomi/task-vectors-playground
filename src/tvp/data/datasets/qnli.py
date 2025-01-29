@@ -1,9 +1,11 @@
-from tvp.data.datasets.glue_data_loader import GLUEDataLoader
+from tvp.data.datasets.glue_data_loader import GLUEDataLoader, clip_collate_fn
 from transformers import AutoTokenizer, BioGptTokenizer
 
 from torch.utils.data import DataLoader
 
 from transformers.data.data_collator import DataCollatorWithPadding
+from tvp.data.datasets.glue_data_loader import clip_collate_fn
+from open_clip.tokenizer import SimpleTokenizer as ClipTokenizer
 
 DATASET_NAME = "qnli"
 
@@ -24,12 +26,16 @@ class QNLI:
             max_seq_length=max_seq_length
         )
 
-        self.collator_fn = DataCollatorWithPadding(
-            tokenizer=tokenizer,
-            padding="longest",
-            max_length=max_seq_length,
-            return_tensors="pt"
+        if isinstance(tokenizer, ClipTokenizer):
+            collate_fn = clip_collate_fn
+        else:
+            collate_fn = DataCollatorWithPadding(
+                tokenizer=tokenizer,
+                padding="longest",
+                max_length=max_seq_length,
+                return_tensors="pt",
         )
+
 
         
         self.train_dataset = train_dataset
@@ -39,7 +45,7 @@ class QNLI:
             shuffle=True,
             batch_size=batch_size,
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )
         
         
@@ -50,7 +56,7 @@ class QNLI:
             shuffle=True,
             batch_size=batch_size,
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )
 
 
@@ -61,5 +67,5 @@ class QNLI:
             shuffle=False,
             batch_size=batch_size, 
             num_workers=num_workers,
-            collate_fn=self.collator_fn
+            collate_fn=collate_fn
         )

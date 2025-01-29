@@ -33,6 +33,9 @@ from open_clip.tokenizer import SimpleTokenizer
 
 registry = {name: obj for name, obj in inspect.getmembers(sys.modules[__name__], inspect.isclass)}
 
+import logging
+
+pylogger = logging.getLogger(__name__)
 
 class GenericDataset(object):
     def __init__(self):
@@ -148,6 +151,7 @@ def get_text_dataset(
 
     if 'ViT-B-16' in tokenizer_name:
         tokenizer = SimpleTokenizer()
+        pylogger.info('Using SimpleTokenizer')
     
     else:
         tokenizer = AutoTokenizer.from_pretrained(

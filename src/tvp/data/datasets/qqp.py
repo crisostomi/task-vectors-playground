@@ -7,7 +7,6 @@ from torch.utils.data import DataLoader
 from transformers.data.data_collator import DataCollatorWithPadding
 from tvp.data.datasets.glue_data_loader import clip_collate_fn
 
-
 DATASET_NAME = "qqp"
 
 class QQP:
@@ -29,7 +28,6 @@ class QQP:
                 padding="longest",
                 max_length=max_seq_length,
                 return_tensors="pt",
-                collate_fn=collate_fn
         )
 
         train_dataset, val_dataset, test_dataset, num_labels = glue_data_loader.load_dataset(
