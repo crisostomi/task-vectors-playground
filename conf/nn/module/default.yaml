@@ -10,17 +10,19 @@ encoder: ??
 classifier: ??
 
 optimizer:
-  _target_: torch.optim.Adam
+  _target_: torch.optim.AdamW
   lr: 1e-5
+  weight_decay: 0.1
   # _target_: torch.optim.SGD
   # lr: 0.1
   # momentum: 0.9
   # weight_decay: 1e-4
 
-# lr_scheduler:
-#   _target_: pl_bolts.optimizers.lr_scheduler.LinearWarmupCosineAnnealingLR
-#   warmup_epochs: 5
-#   max_epochs: ${train.trainer.max_epochs}
-#   warmup_start_lr: 1e-6
-#   eta_min: 0.0
-#   last_epoch: -1
+# TO CHECK
+  # lr_scheduler:
+  #   _target_: pl_bolts.optimizers.lr_scheduler.LinearWarmupCosineAnnealingLR
+  #   warmup_epochs: 5
+  #   max_epochs: ${nn.data.dataset.ft_epochs}
+  #   warmup_start_lr: 1e-6
+  #   eta_min: 0.0
+  #   last_epoch: -1

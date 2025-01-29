@@ -1,7 +1,7 @@
 core:
   project_name: task-vectors-playground
   storage_dir: ${oc.env:PROJECT_ROOT}/storage
-  entity: dansolombrinoandfriends
+  entity: gladia
   version: 0.0.1
   tags:
     - dev
@@ -40,7 +40,7 @@ task_vectors:
     - RESISC45
     - SVHN
 
-  scaling_coefficient: 0.3 #0.8
+  scaling_coefficient: 0.8 #0.8
 
   aggregator:
     # _target_: tvp.task_vectors.aggregator.SphericalAggregator
