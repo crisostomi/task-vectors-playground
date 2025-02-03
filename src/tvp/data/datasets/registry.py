@@ -24,6 +24,7 @@ from tvp.data.datasets.glue_data_loader import GLUEDataLoader
 from tvp.data.datasets.cola import CoLA
 from tvp.data.datasets.sst2 import SST2
 from tvp.data.datasets.mrpc import MRPC
+
 # from tvp.data.datasets.stsb import STSB
 from tvp.data.datasets.qqp import QQP
 from tvp.data.datasets.mnli import MNLI
@@ -36,6 +37,7 @@ registry = {name: obj for name, obj in inspect.getmembers(sys.modules[__name__],
 import logging
 
 pylogger = logging.getLogger(__name__)
+
 
 class GenericDataset(object):
     def __init__(self):
@@ -100,14 +102,12 @@ def split_train_into_train_val(
     """
     new_dataset.val_dataset = dataset.test_dataset
     new_dataset.val_loader = torch.utils.data.DataLoader(
-        new_dataset.val_dataset, batch_size=batch_size, num_workers=num_workers,
-        shuffle=False
+        new_dataset.val_dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False
     )
 
     new_dataset.test_dataset = valset
     new_dataset.test_loader = torch.utils.data.DataLoader(
-        new_dataset.test_dataset, batch_size=batch_size, num_workers=num_workers,
-        shuffle=False
+        new_dataset.test_dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False
     )
 
     new_dataset.classnames = copy.copy(dataset.classnames)
@@ -149,10 +149,10 @@ def get_text_dataset(
 
     dataset_class = registry[dataset_name]
 
-    if 'ViT-B-16' in tokenizer_name:
+    if "ViT-" in tokenizer_name:
         tokenizer = SimpleTokenizer()
-        pylogger.info('Using SimpleTokenizer')
-    
+        pylogger.info("Using SimpleTokenizer")
+
     else:
         tokenizer = AutoTokenizer.from_pretrained(
             pretrained_model_name_or_path=tokenizer_name,

@@ -7,7 +7,7 @@ from tvp.utils import utils
 
 class ClipTextEncoder(torch.nn.Module):
 
-    def __init__(self,  model_name: str, openclip_cachedir=None, cache_dir=None, **kwargs):
+    def __init__(self, model_name: str, openclip_cachedir=None, cache_dir=None, **kwargs):
         super().__init__()
 
         print(f"Loading {model_name} pre-trained weights.")
@@ -47,7 +47,7 @@ class ClipTextEncoder(torch.nn.Module):
 
     def __call__(self, input_ids, attention_mask):
         return self.forward(input_ids, attention_mask)
-    
+
     def save(self, filename):
         print(f"Saving image encoder to {filename}")
         utils.torch_save(self, filename)
@@ -57,12 +57,10 @@ class ClipTextEncoder(torch.nn.Module):
         print(f"Loading image encoder from {filename}")
         state_dict = torch.load(filename)
         return cls.load(model_name, state_dict)
-    
+
     def get_pretrained_weights(self):
         return {name: param.detach().clone() for name, param in self.model.named_parameters()}
 
     def save_pretrained_weights_to_file(self, filename):
         torch.save(self.pretrained_state_dict, filename)
         print(f"Pretrained weights saved to {filename}")
-
-

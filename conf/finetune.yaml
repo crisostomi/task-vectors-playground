@@ -17,7 +17,7 @@ defaults:
 - _self_
 
 epoch_divisor: None
-epochs: 5
+epochs: 1
 ft_on_data_split: train
 merging_method: normal
 

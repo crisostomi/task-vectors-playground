@@ -21,16 +21,18 @@ from tvp.modules.text_heads import TextClassificationHead
 
 pylogger = logging.getLogger(__name__)
 
+
 class TextClassifier(pl.LightningModule):
 
     logger: NNLogger
 
     def __init__(
-        self, 
-        encoder: Union[RobertaModel], 
-        classifier: torch.nn.Module, 
-        metadata: Optional[MetaData] = None, 
-        *args, **kwargs
+        self,
+        encoder: Union[RobertaModel],
+        classifier: torch.nn.Module,
+        metadata: Optional[MetaData] = None,
+        *args,
+        **kwargs,
     ) -> None:
 
         super().__init__()
@@ -39,16 +41,12 @@ class TextClassifier(pl.LightningModule):
         # We want to skip metadata since it is saved separately by the NNCheckpointIO object.
         # Be careful when modifying this instruction. If in doubt, don't do it :]
         self.save_hyperparameters(logger=False, ignore=("metadata",))
-        
+
         self.metadata = metadata
 
         self.num_classes = classifier.out_features
 
-        metric = torchmetrics.Accuracy(
-            task="multiclass", 
-            num_classes=self.num_classes, 
-            top_k=1
-        )
+        metric = torchmetrics.Accuracy(task="multiclass", num_classes=self.num_classes, top_k=1)
         self.train_acc = metric.clone()
         self.val_acc = metric.clone()
         self.test_acc = metric.clone()
@@ -56,33 +54,19 @@ class TextClassifier(pl.LightningModule):
         self.encoder: Union[RobertaModel] = encoder
         self.classification_head: TextClassificationHead = classifier
 
+        self.classification_head.classification_head.weight.requires_grad_(True)
+
         self.batch_gradient_norms = []  # Store gradient norms for each batch
         self.epoch_gradient_norms = []  # Store average gradient norms per epoch
-        
-        self.stage = None
-        
+
         self.save_grad_norms = kwargs.get("save_grad_norms", False)
 
     def forward(self, input_ids, attention_mask):
-        embeddings = self.encoder.forward(
-            input_ids=input_ids, attention_mask=attention_mask
-        )
+        embeddings = self.encoder.forward(input_ids=input_ids, attention_mask=attention_mask)
 
         logits = self.classification_head.forward(embeddings)
-        
-        return logits
 
-    def on_val_epoch_start(self):
-        self.stage = "val"
-    
-    def on_test_epoch_start(self):
-        self.stage = "test"
-    
-    def on_train_epoch_start(self):
-        self.stage = "train"
-        if self.save_grad_norms:
-            # Clear batch gradient norms at the start of each epoch
-            self.batch_gradient_norms.clear()
+        return logits
 
     def _step(self, batch: Dict[str, torch.Tensor], split: str) -> Mapping[str, Any]:
 
@@ -90,32 +74,26 @@ class TextClassifier(pl.LightningModule):
         gt_y = batch[self.hparams.y_key]
         attn_mask = batch[self.hparams.attn_mask_key]
 
-
         logits = self.forward(input_ids=x, attention_mask=attn_mask)
         loss = F.cross_entropy(logits, gt_y)
         preds = torch.softmax(logits, dim=-1)
 
-
         metrics = getattr(self, f"{split}_acc")
         metrics.update(preds, gt_y)
 
-
         self.log_dict(
-            {
-                f"acc/{split}": metrics,
-                f"loss/{split}": loss
-            },
+            {f"acc/{split}": metrics, f"loss/{split}": loss},
             on_epoch=True,
         )
 
         return {"logits": logits.detach(), "loss": loss}
 
-    def freeze_head(self):
-        self.classification_head.classification_head.weight.requires_grad_(False)
-        self.classification_head.classification_head.bias.requires_grad_(False)
+    # def freeze_head(self):
+    #     self.classification_head.classification_head.weight.requires_grad_(False)
+    #     self.classification_head.classification_head.bias.requires_grad_(False)
 
     def training_step(self, batch: Any, batch_idx: int) -> Mapping[str, Any]:
-        result = self._step(batch=batch, split="train")        
+        result = self._step(batch=batch, split="train")
         return result
 
     def validation_step(self, batch: Any, batch_idx: int) -> Mapping[str, Any]:
@@ -141,9 +119,7 @@ class TextClassifier(pl.LightningModule):
             - Tuple of dictionaries as described, with an optional 'frequency' key.
             - None - Fit will run without any optimizer.
         """
-        opt = hydra.utils.instantiate(
-            self.hparams.optimizer, params=self.parameters(), _convert_="partial"
-        )
+        opt = hydra.utils.instantiate(self.hparams.optimizer, params=self.parameters(), _convert_="partial")
         if "lr_scheduler" not in self.hparams:
             return [opt]
         scheduler = hydra.utils.instantiate(self.hparams.lr_scheduler, optimizer=opt)
